@@ -1116,11 +1116,11 @@ h2 { font-family: var(--font-display); font-weight: 700; font-size: 24px; margin
       return { x: pos.x + sc * (a.hx + p.sway), y: pos.y + sc * (a.hy + dy) };
     });
   }
-  // Holding hands is drawn as two arm halves meeting between the nearest hands of both kids.
+  // Only hands that nearly touch are joined; a longer bridge hides the drawn hands and reads as stick arms.
   function drawLink(fa, fb, ha, hb, w, alpha) {
     let best = null;
     for (const a of ha) for (const b of hb) { const d = Math.hypot(a.x - b.x, a.y - b.y); if (!best || d < best.d) best = { a, b, d }; }
-    if (!best || best.d > 170) return;
+    if (!best || best.d > 40) return;
     const mx = (best.a.x + best.b.x) / 2, my = (best.a.y + best.b.y) / 2 + 4;
     ctx.save(); ctx.globalAlpha = alpha;
     for (const extra of [3, 0]) for (const [h, f] of [[best.a, fa], [best.b, fb]]) line(h.x, h.y, mx, my, w + extra, extra ? OUTLINE : lookOf(f).skin);
