@@ -1,0 +1,1442 @@
+<!doctype html><html lang="et"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Patsu, patsu, kooki</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700&display=swap">
+<style>
+/* Layout: one stage (the film) on top, a control strip under it, then the song lines as a jump list. */
+:root {
+  --bg: #F1F5F9;
+  --surface: #FFFFFF;
+  --ink: #1E2B47;
+  --muted: #56637F;
+  --line: #D7DFEA;
+  --accent: #F2B705;
+  --accent-ink: #1E2B47;
+  --font-display: "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Nunito", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10172A; --surface: #18223B; --ink: #E7ECF6; --muted: #9BA7C2; --line: #2A3756;
+    --accent: #FFC93C; --accent-ink: #10172A; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10172A; --surface: #18223B; --ink: #E7ECF6; --muted: #9BA7C2; --line: #2A3756;
+  --accent: #FFC93C; --accent-ink: #10172A; color-scheme: dark;
+}
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.5;
+}
+.wrap {
+  max-width: 1100px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 48px;
+  display: grid; gap: 20px;
+}
+header { display: grid; gap: 2px; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(30px, 5vw, 44px); line-height: 1.05; margin: 0; text-wrap: balance; }
+.meta { color: var(--muted); margin: 0; }
+.stage { position: relative; border-radius: 14px; overflow: hidden; background: #1E2B47; box-shadow: 0 1px 0 var(--line), 0 12px 30px -18px rgba(20, 30, 60, .45); }
+.stage canvas { display: block; width: 100%; max-width: 100%; height: auto; aspect-ratio: 16 / 9; }
+.stage:fullscreen { display: grid; place-items: center; background: #000; border-radius: 0; }
+.stage:fullscreen canvas { width: min(100vw, 177.78vh); }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+button, .chip {
+  font: 700 15px/1 var(--font-body); color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 999px; padding: 10px 16px; cursor: pointer;
+}
+button:hover { border-color: var(--muted); }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+#play { background: var(--accent); color: var(--accent-ink); border-color: transparent; min-width: 116px; }
+.tempo { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.tempo input { width: 140px; accent-color: var(--accent); }
+.tempo output { font-variant-numeric: tabular-nums; min-width: 92px; color: var(--muted); }
+.check { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+.spacer { flex: 1 1 0; }
+.games { display: flex; flex-wrap: wrap; gap: 8px; }
+.games a { text-decoration: none; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 10px 18px; font-weight: 700; }
+.games a[aria-current="page"] { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.games a:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.music { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 12px; }
+.music h2 { margin: 0; }
+.music p { margin: 0; color: var(--muted); font-size: 14px; }
+.music input[type="file"] { max-width: 100%; font: inherit; }
+.music input::file-selector-button { font: 700 15px var(--font-body); background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 999px; padding: 10px 16px; margin-right: 12px; cursor: pointer; }
+.music audio { width: 100%; }
+#musicStatus { overflow-wrap: anywhere; }
+#removeMusic { justify-self: start; }
+h2 { font-family: var(--font-display); font-weight: 700; font-size: 24px; margin: 8px 0 0; }
+.lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.lines button {
+  width: 100%; text-align: left; border-radius: 12px; padding: 12px 16px;
+  display: grid; grid-template-columns: minmax(150px, 230px) 1fr; gap: 4px 18px; align-items: baseline;
+  font-weight: 400;
+}
+.lines button[aria-current="true"] { border-color: var(--accent); box-shadow: inset 4px 0 0 var(--accent); }
+.lines .w { font-family: var(--font-display); font-weight: 700; font-size: 19px; line-height: 1.2; }
+.lines .a { color: var(--muted); min-width: 0; }
+.lines .j { display: block; color: var(--ink); margin-top: 2px; }
+.lines .j b { font-weight: 700; }
+.notes { color: var(--muted); max-width: 68ch; margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+@media (max-width: 640px) {
+  .lines button { grid-template-columns: 1fr; }
+  .tempo input { width: 110px; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+
+<div class="wrap">
+  <nav class="games" id="games" aria-label="Vali laulumäng"></nav>
+  <header>
+    <h1>Patsu, patsu, kooki</h1>
+    <p class="meta">Laulumäng 3–4-aastastele · Keila kihelkond, Eesti Rahvaluule Arhiiv · G-duur</p>
+  </header>
+
+  <div class="stage" id="stage">
+    <canvas id="film" width="1920" height="1080" aria-label="Animatsioon: kümme last ringis teevad laulumängu liigutusi"></canvas>
+  </div>
+
+  <div class="controls">
+    <button id="play" type="button">▶ Mängi</button>
+    <button id="restart" type="button">Algusest</button>
+    <label class="tempo" for="bpm">Tempo <input id="bpm" type="range" min="50" max="120" step="5" value="90"><output id="bpmOut">90 lööki/min</output></label>
+    <label class="check" for="loop"><input id="loop" type="checkbox"> Korda rida</label>
+    <label class="check" for="sound"><input id="sound" type="checkbox" checked> Plaksud ja takt</label>
+    <span class="spacer"></span>
+    <button id="full" type="button">Täisekraan</button>
+  </div>
+
+  <section class="music" aria-labelledby="musicTitle">
+    <h2 id="musicTitle">Sinu muusika</h2>
+    <label for="musicFile">Lisa oma helifail</label>
+    <input id="musicFile" type="file" accept="audio/*,.mp3,.wav,.m4a,.ogg,.flac,.aac" aria-describedby="musicPrivacy musicStatus">
+    <p id="musicPrivacy">Fail mängib ainult selles brauseris. Seda ei laadita serverisse. Lehe uuesti avamisel vali fail uuesti.</p>
+    <p id="musicStatus" role="status">Vali MP3, WAV või muu brauseri toetatud helifail.</p>
+    <audio id="music" controls preload="metadata" hidden aria-label="Sinu muusika"></audio>
+    <button id="removeMusic" type="button" hidden>Eemalda muusika</button>
+    <p>Mängi, Paus ja Algusest juhivad ka muusikat. Tempo, rea valik ja rea kordamine muudavad ainult animatsiooni.</p>
+  </section>
+
+  <h2>Read ja liigutused</h2>
+  <ol class="lines" id="lines"></ol>
+
+  <h2>Mida juhend täpselt ei ütle</h2>
+  <ul class="notes" id="notes"></ul>
+</div>
+
+<script>
+(() => {
+  const W = 1280, H = 720, SCALE = 1.5;
+  const canvas = document.getElementById('film');
+  const ctx = canvas.getContext('2d');
+  const requested = new URLSearchParams(location.search).get('game');
+  const MELODY_NOTE = 'PDF-is pole meloodiat. Kasuta oma helifaili või laula ise; tempot saab muuta.';
+  const wordGap = w => w.endsWith('-') ? '' : ' ';
+  const joinWords = words => words.map((w, i) => i < words.length - 1 ? w + wordGap(w) : w).join('');
+  const lyric = (words, act, lead, extra = {}) => ({ words, act, lead, wordBeats: words.map((_, i) => words.length === 2 ? i * 2 : i), ...extra });
+
+  const TAKE_HAND = { kind: 'crouchLate', chosenKind: 'takenHand', leadKind: 'takeHand', act: 'Kõik teised kükitavad seal, kus nad on.', lead: 'Võtab valitud lapsel käest kinni: tema on järgmine hunt.', form: { walk: 0.9, stopAt: 1.8 }, path: { mode: 'nextTo', dur: 1.6 }, takeLink: true };
+  // Games after the first two run on the shared engine: ring formation, a leader in the middle and role swaps.
+  const GAMES = {
+    kooki: {
+      title: 'Patsu, patsu, kooki', age: '3–4 a',
+      meta: 'Laulumäng 3–4-aastastele · Keila kihelkond, Eesti Rahvaluule Arhiiv · G-duur',
+      aria: 'Animatsioon: kümme last ringis teevad laulumängu liigutusi',
+      sound: 'Plaksud ja takt', soundWord: 'Plaksud',
+      room: { wall: ['#CFE7E4', '#DDEFEB'], flags: ['#E84C3D', '#F2B705', '#2E9E6B', '#3D7DD8', '#D94F8C'], rug: ['#3D7DD8', '#5B95E3'] },
+      notes: [
+        'PDF-is pole meloodiat, seega animatsioonis on ainult plaksud ja takt. Laulge ise peale; tempot saab muuta.',
+        'Pärast „ahju kuuma pista!” astuvad lapsed sammu tagasi, et järgmine rida algaks jälle ringis.',
+        '„Nämm-nämm” tuleb kohe pärast rida „Sööme koogi ära”, ühe takti jooksul.',
+      ],
+    },
+    oravake: {
+      title: 'Kopp-kopp, oravakene', age: '3–4 a',
+      meta: 'Laulumäng 3–4-aastastele · Lõuna-Eesti pärimuse portaal, Loodushäälendite andmebaas · G-duur',
+      aria: 'Animatsioon: lapsed mängivad oravamängu, koputavad, näitavad saba ja silmi ning hüppavad',
+      sound: 'Koputused ja takt', soundWord: 'Koputused',
+      room: { wall: ['#DCE8C9', '#F1EED5'], flags: ['#B96735', '#D6A237', '#6B8D4E', '#BA653C', '#8DA05E'], rug: ['#73976B', '#A3BE87'], decor: () => { drawPine(480, 286, 0.8); drawPine(1210, 286, 0.65); drawSquirrel(400, 262); } },
+      notes: [
+        'Alguses istuvad lapsed ringis. Enne esimest salmi tõusevad nad püsti, sest esimese rea tegevus on juhendis seistes.',
+        'Iga kahe rea pikkune salm kordub kaks korda. Animatsioonis on igale reale neli lööki; juhend täpset rütmi ei määra.',
+        'Juhendis on akordid G, C, Am, D, G, kuid meloodiat pole. Kasuta oma helifaili või laula ise.',
+        'Vaba liikumise teekonnad on näitlikud. Juhendi märge "67?" on ebaselge; viimasel real liiguvad käed vaheldumisi üles ja alla.',
+      ],
+    },
+    tihane: {
+      title: 'Tii-tii tihane', age: '3–4 a',
+      leaderMark: 'crown',
+      meta: 'Laulumäng 3–4-aastastele · Eesti Kirjandusmuuseum, laste- ja koolipärimuse andmebaas Uka-Uka · G-duur',
+      aria: 'Animatsioon: lapsed ringis on linnud, juht liigub ringi sees ja lõpuks lendavad kõik vabalt ringi',
+      sound: 'Hüpped ja takt', soundWord: 'Hüpped',
+      room: { wall: ['#D6E9F5', '#E9F3F8'], flags: ['#F2B705', '#3D7DD8', '#E84C3D', '#7CB342', '#16A3B8'], rug: ['#2E9E6B', '#55B987'], decor: drawBirds },
+      notes: [
+        'Juhendis on „üle metsa” juures märge x3. Animatsioonis on see üks rida, kus „üle metsa” kõlab kolm korda.',
+        'Juhi teekond on näitlik: juhend ütleb ainult, et ta liigub ringis päripäeva ja teeb väravate all slaalomit.',
+        MELODY_NOTE,
+      ],
+      intro: { kind: 'stand', leadKind: 'idle', act: 'Lapsed seisavad ringis, käed all.', lead: 'Juht seisab ringi keskel.', path: { mode: 'center' } },
+      lines: [
+        lyric(['Tii-', 'tii-', 'tihane,'], 'Seisavad näoga ringi keskele ja lehvitavad kätega nagu linnud tiibu.', 'Seisab ringi keskel.', { kind: 'wings', leadKind: 'idle', path: { mode: 'center' } }),
+        lyric(['vaa-', 'vaa-', 'varblane.'], 'Teevad rütmis 2 koosjalu hüpet ringi keskele.', 'Hakkab ringis päripäeva liikuma.', { kind: 'hop2', leadKind: 'roam', form: { r: 0.8, rShape: 'hop2' }, path: { mode: 'circle', rate: 0.55, radius: 0.42, dur: 1 }, sounds: [[0.7, 'thud'], [1.7, 'thud']] }),
+        lyric(['Liiri-', 'lõõri', 'lõoke,'], 'Võtavad kätest kinni ja tõstavad käed väravaks.', 'Käib käte alt välja ja sisse (slaalom).', { kind: 'gate', leadKind: 'roam', links: 'ring', path: { mode: 'slalom', rate: 0.5, dur: 1 } }),
+        lyric(['piiri-', 'pääri', 'pääsuke.'], 'Langetavad käed ja kükitavad.', 'Jääb ringi keskel seisma.', { kind: 'squatHold', leadKind: 'arrive', links: 'ring', path: { mode: 'center', dur: 1.4 } }),
+        lyric(['Hüppa', 'üle', 'oaaia,'], 'Kükitavad, käed lahti, ja teevad väikseid jänkuhüppeid.', 'Teeb ringi sees jänkuhüppeid.', { kind: 'bunny', leadKind: 'bunny', path: { mode: 'circle', rate: 0.6, radius: 0.22, dur: 1 } }),
+        lyric(['karga', 'üle', 'kapsaaia,'], 'Kükitavad ja teevad väikseid jänkuhüppeid.', 'Teeb ringi sees jänkuhüppeid.', { kind: 'bunny', leadKind: 'bunny', path: { mode: 'circle', rate: 0.6, radius: 0.22, dur: 1 } }),
+        lyric(['üle metsa,', 'üle metsa,', 'üle metsa'], 'Kõik lehvitavad tiibu, tõusevad ja liiguvad vabalt ruumis ringi.', null, { wordBeats: [0, 1.33, 2.67], kind: 'flyFree', leadKind: 'flyFree', form: { free: 1, walk: 0.9 }, path: { mode: 'free', dur: 1.2 } }),
+        lyric(['vurr.'], 'Kõik ütlevad „Vurrr…”, lehvitavad edasi ja liiguvad vabalt ringi.', null, { kind: 'vurr', leadKind: 'vurr', form: { walk: 0.9 }, path: { mode: 'free', dur: 0.01 }, bubble: { text: 'Vurrr…', from: 0.1, to: 3.9 } }),
+      ],
+      seq: [
+        [0, '1. KORD'], [1, '1. KORD'],
+        [0, 'KORDUS', { lead: 'Liigub ringis edasi.', leadKind: 'roam', path: { mode: 'circle', rate: 0.55, radius: 0.42, dur: 1 } }],
+        [1, 'KORDUS', { act: 'Teevad rütmis 2 koosjalu hüpet tagurpidi, ringi keskelt välja.', lead: 'Liigub ringis edasi.', form: { r: 1, rShape: 'hop2' } }],
+        [2, 'EDASI'], [3, 'EDASI'], [4, 'EDASI'], [5, 'EDASI'], [6, 'LÕPP'], [7, 'LÕPP'],
+      ],
+    },
+    kuu: {
+      title: 'Kuu paistab, kukk laulab', age: '6–7 a',
+      leaderMark: 'wolf', ringLabel: 'Lapsed:', leadLabel: 'Hunt:',
+      meta: 'Laulumäng 6–7-aastastele · Eesti regilaulude andmebaas · H-duur',
+      aria: 'Animatsioon: hunt magab ringi keskel, lapsed ärkavad, jooksevad ringi ja hunt valib uue hundi',
+      sound: 'Takt', soundWord: 'Takt',
+      room: { wall: ['#1D2A4A', '#34466E'], floor: ['#C9A06A', '#B88E59'], flags: ['#F4E3A1', '#C9D6EA', '#9FB4D8', '#F4E3A1', '#E6C36A'], rug: ['#5C6BC0', '#7A88D6'], ink: '#F3F1E7', sub: 'rgba(243,241,231,0.75)', backdrop: drawNight },
+      notes: [
+        'Lõpus läheb tempo kiiremaks ja viimasel real jälle aeglasemaks, nagu juhendis märgitud.',
+        'Kui hunt võtab lapsel käest kinni, saab sellest lapsest uus hunt. Animatsioonis vahetavad nad rollid ja hundikõrvad lähevad uuele hundile.',
+        'Juhend ei ütle, kus lapsed kükitavad. Animatsioonis kükitavad nad seal, kus nad parajasti on.',
+        MELODY_NOTE,
+      ],
+      intro: { kind: 'crouch', leadKind: 'sleep', act: 'Lapsed kükitavad näoga ringi keskele.', lead: 'Hunt magab ringi keskel.', path: { mode: 'center' }, form: { r: 0.95 } },
+      lines: [
+        lyric(['Kuu', 'paistab,', 'kukk', 'laulab,'], 'Lapsed „ärkavad” ja sirutavad ennast pikaks.', 'Magab ringi keskel.', { kind: 'crouchStretch', leadKind: 'sleep', path: { mode: 'center' } }),
+        lyric(['pime', 'öö on', 'pilve', 'taga.'], 'Sõnal „pime” katavad silmad peopesadega ja hõõruvad silmi.', 'Magab.', { kind: 'eyesCrouch', leadKind: 'sleep', path: { mode: 'center' } }),
+        lyric(['Jookse,', 'jookse,', 'hallivatimees,'], 'Tõusevad ja liiguvad vabalt ruumis ringi.', 'Hiilib ja otsib endale paarilist.', { kind: 'roam', leadKind: 'sneak', form: { free: 1, walk: 0.9 }, path: { mode: 'free', dur: 1.2 } }),
+        lyric(['kuni', 'koidu-valge', 'tuleb ees!'], 'Liiguvad vabalt ruumis ringi.', 'Hiilib ja otsib endale paarilist.', { kind: 'roam', leadKind: 'sneak', form: { walk: 0.9 }, path: { mode: 'free', dur: 0.01 } }),
+        lyric(['Susi', 'jookseb', 'soo-äärt', 'mööda,'], 'Liiguvad ruumis väikeste hiilivate sammudega.', 'Uus hunt läheb ringi keskele magama.', { kind: 'sneakSmall', leadKind: 'goSleep', form: { walk: 0.45 }, path: { mode: 'center', dur: 2 } }),
+        lyric(['otsib', 'oma', 'une-mamma.'], 'Tõstavad käe kulmude juurde ja otsivad.', 'Magab.', { kind: 'search', leadKind: 'sleep', path: { mode: 'center' } }),
+      ],
+      seq: [
+        [0, '1. KORD'], [1, '1. KORD'],
+        [0, 'KORDUS', { kind: 'wake', act: 'Tõusevad ja sirutavad ennast seistes pikaks.' }],
+        [1, 'KORDUS', { kind: 'eyes', leadKind: 'wolfWake', lead: 'Tõuseb ja sirutab ennast.' }],
+        [2, 'JOOKSE'], [3, 'JOOKSE'], [2, 'JOOKSE', { act: 'Liiguvad vabalt ruumis ringi.' }],
+        [3, 'JOOKSE', { ...TAKE_HAND, chosen: 2, swapAfter: true }],
+        [4, 'SUSI'], [5, 'SUSI'],
+        [4, 'SUSI', { leadKind: 'sleep', lead: 'Magab.', path: { mode: 'center' } }], [5, 'SUSI'],
+        [2, 'LÕPP', { act: 'Kõik lapsed liiguvad ruumis ringi.', lead: 'Tõuseb, hiilib ja otsib endale paarilist.', tempo: 1.1 }],
+        [3, 'LÕPP', { tempo: 1.2 }],
+        [2, 'LÕPP', { act: 'Kõik lapsed liiguvad ruumis ringi.', tempo: 1.3 }],
+        [3, 'LÕPP', { ...TAKE_HAND, chosen: 7, tempo: 0.8 }],
+      ],
+    },
+    siil: {
+      title: 'Siili-isand, okka-kuub', age: '6–7 a',
+      noLeader: true, pairs: true, prop: drawHedgehog, r0: 0.94,
+      meta: 'Laulumäng 6–7-aastastele · Eesti Rahvaluule Arhiiv, loomamuinasjuttude ja loitsude käsikirjad · D-duur',
+      aria: 'Animatsioon: lapsed käivad paarides ringis, näitavad okkaid, koputavad, plaksutavad ja vahetavad paarilist',
+      sound: 'Plaksud ja takt', soundWord: 'Plaksud',
+      room: { wall: ['#E7E3C8', '#F2EEDB'], flags: ['#8C6A43', '#B8873E', '#6B8D4E', '#A5643A', '#7FA06A'], rug: ['#6B8D4E', '#94B07A'], decor: () => { drawPine(470, 286, 0.75); drawPine(1225, 286, 0.6); } },
+      notes: [
+        'Juhendis on salm üks kord, seega paarilise vahetus on näidatud ühe korra.',
+        'Õlale koputamist näitab eestvaates parema käe nimetissõrm.',
+        MELODY_NOTE,
+      ],
+      intro: { kind: 'standHold', act: 'Lapsed seisavad ringis paarilisega kõrvuti, käest kinni.', links: 'pairs' },
+      lines: [
+        lyric(['Siili-', 'isand,', 'okka-', 'kuub,'], 'Paarid kõnnivad käest kinni uhkelt, pea püsti, mööda ringjoont päripäeva.', null, { kind: 'holdWalk', links: 'pairs', form: { rot: 0.22 } }),
+        lyric(['sul on', 'nõelu', 'rohkem', 'muust!'], 'Paarilised pööravad näod vastamisi, tõstavad käed ja raputavad sõrmi nagu okkaid.', null, { kind: 'spines', form: { phase: 1 } }),
+        lyric(['Nõela', 'siit ja', 'nõelda', 'sealt,'], 'Parema käe nimetissõrmega koputavad 4 korda paarilise vasakule õlale.', null, { kind: 'tap', sounds: [[0, 'knock'], [1, 'knock'], [2, 'knock'], [3, 'knock']] }),
+        lyric(['piki', 'vana', 'kuuse', 'pealt.'], 'Igaüks teeb üksi 4 plaksu pea kohal.', null, { kind: 'headClap', sounds: [[0, 'clap'], [1, 'clap'], [2, 'clap'], [3, 'clap']] }),
+        lyric(['Ära sa', 'tiri,', 'ära sa', 'torka,'], '„Ära sa tiri”: siseringi laps astub selg ees 2 sammu sisse. „Ära sa torka”: välisringi laps astub 2 sammu tagasi.', null, { kind: 'pull', links: 'pairs', form: { pull: 'tiri' } }),
+        lyric(['vii oma', 'nõelad', 'kaugele', 'metsa,'], 'Paarilised lasevad lahti. Välisringi laps liigub päripäeva uue paarilise juurde.', null, { kind: 'release', form: { swap: true } }),
+        lyric(['peida', 'ennast', 'sambla', 'sisse!'], 'Uued paarid võtavad kätest kinni, teevad täisküki ja ütlevad „Ššhh!”.', null, { kind: 'hideShush', links: 'pairs', bubble: { text: 'Ššhh!', from: 2.1, to: 3.9 } }),
+      ],
+      seq: [[0, 'SALM'], [1, 'SALM'], [2, 'SALM'], [3, 'SALM'], [4, 'SALM'], [5, 'SALM'], [6, 'SALM']],
+    },
+    tera: {
+      title: 'Tõuse, tõuse, terakene', age: '6–7 a',
+      leaderMark: 'crown',
+      meta: 'Laulumäng 6–7-aastastele · Halliste kihelkond, Eesti Rahvaluule Arhiiv · E-duur',
+      aria: 'Animatsioon: juht kasvab nagu tera, ring kutsub teda ja juht valib uue juhi',
+      sound: 'Hüpped ja takt', soundWord: 'Hüpped',
+      room: { wall: ['#F2E7BC', '#FAF3D9'], flags: ['#E2A93B', '#C6862D', '#7CB342', '#F2B705', '#B5363B'], rug: ['#C6862D', '#E2B15A'], decor: drawWheatField },
+      notes: [
+        'Valitud lapsest saab uus juht. Animatsioonis vahetavad juht ja valitud laps kohad ning kroon läheb uuele juhile.',
+        'Keksimine ja tantsimine on näidatud väikeste hüpetena koos kätega.',
+        MELODY_NOTE,
+      ],
+      intro: { kind: 'stand', leadKind: 'crouch', act: 'Lapsed seisavad näoga ringi keskele.', lead: 'Juht kükitab ringi keskel.', path: { mode: 'center' } },
+      lines: [
+        lyric(['Tõuse,', 'tõuse,', 'terakene,'], 'Võtavad kätest kinni ja hakkavad liikuma päripäeva.', 'Tõuseb aeglaselt kükist püsti.', { kind: 'holdWalk', leadKind: 'leaderRise', links: 'ring', form: { rot: 0.2 }, path: { mode: 'center' } }),
+        lyric(['kasva,', 'kasva,', 'kõrrekene!'], 'Liiguvad edasi päripäeva.', 'Sirutab mõlemad käed taeva poole ja tõuseb varvastele.', { kind: 'holdWalk', leadKind: 'leaderReach', links: 'ring', form: { rot: 0.2 }, path: { mode: 'center' } }),
+        lyric(['Too sa', 'meile', 'magust', 'saia,'], 'Jäävad seisma ja kutsuvad mõlema käega juhti enda poole.', 'Keksib ja tantsib ringi sees.', { kind: 'beckon', leadKind: 'dance', path: { mode: 'circle', rate: 0.7, radius: 0.3, dur: 1 } }),
+        lyric(['too sa', 'kooki', 'kogu', 'majal.'], 'Kutsuvad mõlema käega juhti enda poole.', 'Keksib ja tantsib ringi sees.', { kind: 'beckon', leadKind: 'dance', path: { mode: 'circle', rate: 0.7, radius: 0.3, dur: 1 } }),
+        lyric(['Maa seest', 'karga', 'koidu', 'poole,'], 'Lähevad kiiresti täiskükki.', 'Käed puusas, teeb rütmis 2 koosjalu hüpet.', { kind: 'quickSquat', leadKind: 'hipsJump2', path: { mode: 'center', dur: 1 }, sounds: [[0.9, 'thud'], [2.7, 'thud']] }),
+        lyric(['lehed', 'laota', 'päeva', 'poole.'], 'Tõusevad kiiresti, käed puusas, ja teevad ühe suure hüppe. Valitud laps jääb kükki.', 'Valib lapse, jookseb tema ette ja teeb sõnal „poole” täisküki.', { kind: 'ringRiseJump', chosen: 4, chosenKind: 'crouch', leadKind: 'chooseRun', path: { mode: 'toKid', dur: 2.2 }, swapAfter: true, sounds: [[3.8, 'thud']] }),
+        lyric(['Põllu', 'peale', 'kulda', 'kalla,'], 'Lähevad kiiresti täiskükki ja puistavad kulda laiali.', 'Käed puusas, hüppab koosjalu ringi keskel.', { kind: 'goldScatter', leadKind: 'hipsJump2', path: { mode: 'center', dur: 1 }, sounds: [[0.9, 'thud'], [2.7, 'thud']] }),
+        lyric(['rõõmu', 'too sa', 'rahval', 'valla!'], 'Tõusevad ja teevad hüppe kohapeal. Valitud laps jääb kükki.', 'Valib uue lapse, jookseb tema ette ja teeb sõnal „valla” täisküki.', { kind: 'ringRiseJumpFree', chosen: 9, chosenKind: 'crouch', leadKind: 'chooseRun', path: { mode: 'toKid', dur: 2.2 }, swapAfter: true, sounds: [[3.8, 'thud']] }),
+      ],
+      seq: [
+        [0, '1. SALM'], [1, '1. SALM'], [2, '1. SALM'], [3, '1. SALM'], [2, '1. SALM'], [3, '1. SALM'],
+        [4, '2. SALM'], [5, '2. SALM'], [2, '2. SALM'], [3, '2. SALM'], [2, '2. SALM'], [3, '2. SALM'],
+        [6, '3. SALM'], [7, '3. SALM'], [2, '3. SALM'], [3, '3. SALM'], [2, '3. SALM'], [3, '3. SALM'],
+      ],
+    },
+    soori: {
+      title: 'Sõõri-vääri, sõrmekene', age: '3–7 a',
+      leaderMark: 'crown',
+      meta: 'Laulumäng 3–7-aastastele · Lõuna-Eesti pärimuse portaal (LEPP), käsikirjalised näpumängud · D-duur',
+      aria: 'Animatsioon: ring kõnnib, juht ehk kirev kivi teeb slaalomit ja paneb kivi valitud lapse peopesadesse',
+      sound: 'Plaks ja takt', soundWord: 'Plaks',
+      room: { wall: ['#E3DDF0', '#EFEBF6'], flags: ['#9B59B6', '#16A3B8', '#F28C28', '#D94F8C', '#7CB342'], rug: ['#9B59B6', '#B983CC'], decor: drawMill },
+      notes: [
+        'PDF-i pealkirjas on „Sõõri-väärti”, laulus „Sõõri-vääri”. Kasutame laulu kirjapilti.',
+        'Juhend ei ütle, kas lapsed tõusevad enne rida „Otsi, otsi”. Animatsioonis jäävad nad kükki.',
+        '„Kivi” on värviline kivike juhi kätes. Viimasel real paneb juht selle valitud lapse peopesadesse.',
+        MELODY_NOTE,
+      ],
+      intro: { kind: 'stand', leadKind: 'idle', act: 'Lapsed seisavad ringis, käed vabalt kõrval.', lead: 'Juht („kirev kivi”) seisab ringi keskel.', path: { mode: 'center' } },
+      lines: [
+        lyric(['Sõõri-', 'vääri,', 'sõrmekene,'], 'Võtavad kätest kinni ja kõnnivad rahulikult päripäeva.', 'Tõstab käed enda ette ja veeretab neid ümber teineteise.', { kind: 'holdWalk', leadKind: 'peel', links: 'ring', form: { rot: 0.2 }, path: { mode: 'center' } }),
+        lyric(['kuhu', 'veeres', 'kirev', 'kivi?'], 'Kõnnivad edasi ringis.', 'Liigub ringi sees vastupäeva.', { kind: 'holdWalk', leadKind: 'roam', links: 'ring', form: { rot: 0.2 }, path: { mode: 'circle', rate: -0.5, radius: 0.5, dur: 1 } }),
+        lyric(['Veeres', 'vana', 'veski', 'taha,'], 'Lasevad kätest lahti ja veeretavad käsi enda ees.', 'Liigub ringis olijate vahel (slaalom).', { kind: 'peel', leadKind: 'roam', path: { mode: 'slalom', rate: -0.45, dur: 1 } }),
+        lyric(['kukkus', 'kuldse', 'künka', 'taha.'], 'Kükitavad.', 'Jätkab slaalomit.', { kind: 'quickSquat', leadKind: 'roam', path: { mode: 'slalom', rate: -0.45, dur: 0.01 } }),
+        lyric(['Otsi,', 'otsi,', 'ära', 'väsi,'], 'Kükis tõstavad käe kulmude juurde ja otsivad.', 'Jätkab slaalomit.', { kind: 'searchCrouch', leadKind: 'roam', path: { mode: 'slalom', rate: -0.45, dur: 0.01 } }),
+        lyric(['enne', 'kui sind', 'hüüab', 'käsi!'], 'Kükis sirutavad käed ette, peopesad üleval, ja hüüavad „Aaee!”.', 'Valib lapse, läheb tema ette ja paneb „kivi” tema peopesadesse.', { kind: 'palmsShout', leadKind: 'giveStone', chosen: 9, path: { mode: 'toKid', dur: 1.8 }, bubble: { text: 'Aaee!', from: 2.6, to: 3.9 }, sounds: [[2.6, 'clap']] }),
+      ],
+      seq: [[0, 'SALM'], [1, 'SALM'], [2, 'SALM'], [3, 'SALM'], [4, 'SALM'], [5, 'SALM']],
+    },
+  };
+  const GAME_ID = requested in GAMES ? requested : 'kooki';
+  const isSquirrel = GAME_ID === 'oravake';
+  const GAME = GAMES[GAME_ID];
+  const ENGINE = Boolean(GAME.lines);
+  const gameTitle = GAME.title;
+  document.title = gameTitle;
+  document.querySelector('h1').textContent = gameTitle;
+  document.querySelector('.meta').textContent = GAME.meta;
+  canvas.setAttribute('aria-label', GAME.aria);
+  document.querySelector('label[for="sound"]').lastChild.textContent = ' ' + GAME.sound;
+  const nav = document.getElementById('games');
+  for (const [id, g] of Object.entries(GAMES)) {
+    const a = document.createElement('a');
+    a.href = id === 'kooki' ? './' : `./?game=${id}`;
+    a.textContent = g.title; a.title = g.age;
+    if (id === GAME_ID) a.setAttribute('aria-current', 'page');
+    nav.appendChild(a);
+  }
+  for (const note of GAME.notes) { const li = document.createElement('li'); li.textContent = note; document.getElementById('notes').appendChild(li); }
+
+  const LINES = ENGINE ? GAME.lines : isSquirrel ? [
+    { kind: 'knock', words: ['Kopp-kopp,', 'oravake,'], act: 'Seisavad ja koputavad ühe käe rusikaga rütmis vastu teise käelaba.', wordBeats: [0, 2] },
+    { kind: 'peel', words: ['koori', 'käbi,', 'pähklike.'], act: 'Keerutavad käsi enda ees.', wordBeats: [0, 1, 2] },
+    { kind: 'tailEyes', words: ['Saba', 'seljas,', 'silmad', 'peas,'], act: 'Saba: käed selja taha. Silmad: sõrmedest suured ringid silmade ümber.', wordBeats: [0, 1, 2, 3] },
+    { kind: 'pine', words: ['hüppad', 'kõrge', 'kuuse', 'reas.'], act: 'Väike koosjalu hüpe. Käed moodustavad pea kohal kuuseladva.', wordBeats: [0, 1, 2, 3] },
+    { kind: 'wander', words: ['Pilla-palla,', 'pähklikoor,'], act: 'Liiguvad ruumis vabalt ringi.', wordBeats: [0, 2] },
+    { kind: 'alternate', words: ['tühjaks', 'saigi', 'sügis-korv'], act: 'Liigutavad paremat ja vasakut kätt vaheldumisi üles ja alla.', wordBeats: [0, 1, 2] },
+  ] : [
+    { kind: 'clap',  words: ['Patsu,', 'patsu,', 'kooki,'], act: 'Plaksutavad rütmis käsi: 3 plaksu.' },
+    { kind: 'roll',  words: ['veere,', 'veere,', 'kooki!'], act: 'Rullivad käsi enda ees.' },
+    { kind: 'sugar', words: ['Suhkrut', 'peale', 'puista,'], act: 'Sirutavad käed üles, toovad need aeglaselt alla ja liigutavad samal ajal sõrmi.' },
+    { kind: 'oven',  words: ['ahju', 'kuuma', 'pista!'], act: 'Astuvad ühe sammu ringi keskele ja lükkavad mõlemad käed ette, peopesad üleval.' },
+    { kind: 'eat',   words: ['Sööme', 'koogi', 'ära,'], act: 'Tõstavad käed suu juurde ja teevad söömist järele.' },
+    { kind: 'nam',   words: ['nämm-nämm!'], act: 'Pärast laulmist teevad kõik söömise hääli.' },
+    { kind: 'shout', words: ['teeme', 'palju', 'kära!'], act: 'Käed suu ees ruuporiks, „kära” hüütakse valjult ja tehakse üks hüpe koos jalgadega.' },
+  ];
+
+  const segs = [];
+  let total = 0;
+  const add = (kind, extra) => { segs.push({ kind, start: total, len: 4, ...extra }); total += 4; };
+  if (!ENGINE) {
+  add('intro', { label: 'ALUSTAME', words: ['1', '2', '3', '4'], act: isSquirrel ? 'Istume ringis, käed kõrval. Enne laulu tõuseme püsti.' : 'Lapsed seisavad ringis, käed vabalt all enda kõrval.' });
+  if (isSquirrel) {
+    for (const pair of [[0, 1], [2, 3], [4, 5]])
+      for (const label of ['1. KORD', 'KORDUS'])
+        for (const i of pair) add(LINES[i].kind, { ...LINES[i], label, lineIndex: i });
+  } else {
+    for (const label of ['1. KORD', 'KORDUS']) for (const i of [0, 1, 2, 3]) add(LINES[i].kind, { ...LINES[i], label, lineIndex: i });
+    for (const i of [4, 5, 6]) add(LINES[i].kind, { ...LINES[i], label: 'LÕPP', lineIndex: i });
+  }
+  add('end', { label: 'VALMIS', words: ['Tubli!'], act: 'Mäng on läbi. Kordame veel?' });
+  }
+
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const ease = t => t * t * (3 - 2 * t);
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const TAU = Math.PI * 2;
+
+  const CX = 885, CY = 418, RX = 330, RY = 112;
+  const baseAngle = k => -Math.PI / 2 + (k + 0.5) * TAU / 10;
+  const twoSteps = (lb, from) => (ease(clamp((lb - from) / 0.7)) + ease(clamp((lb - from - 1) / 0.7))) / 2;
+
+  function formState(s, lb) {
+    const f = s.form;
+    return {
+      rot: s.rot0 + (f.rot || 0) * lb,
+      r: lerp(s.r0, s.r1, f.rShape === 'hop2' ? twoSteps(lb, 0) : ease(clamp(lb))),
+      free: lerp(s.free0, s.free1, ease(clamp(lb / 1.2))),
+      w: s.w0 + (f.walk || 0) * Math.min(lb, f.stopAt ?? Infinity),
+      phase: lerp(s.ph0, s.ph1, ease(clamp(lb))),
+      pull: f.pull === 'tiri' ? -0.12 * (twoSteps(lb, 0) - twoSteps(lb, 2)) : 0,
+      swap: s.sw0 + (f.swap ? ease(clamp((lb - 0.5) / 3)) : 0),
+    };
+  }
+
+  function slotPos(s, lb, k, st = formState(s, lb)) {
+    let x, y, facing = 'in';
+    if (GAME.pairs) {
+      const p = k >> 1, isB = k & 1, th = -Math.PI / 2 + (p + 0.5) * TAU / 5 + st.rot, d = 0.12 - 0.06 * st.phase;
+      const a = isB ? th + d + st.swap * TAU / 5 : th - d;
+      const R = st.r * (1 + (isB ? 0.1 : -0.22) * st.phase) + st.pull;
+      x = CX + RX * R * Math.cos(a); y = CY + RY * R * Math.sin(a);
+      if (st.phase > 0.5 && !isB) facing = 'out';
+    } else {
+      const a = baseAngle(k) + st.rot;
+      x = CX + RX * st.r * Math.cos(a); y = CY + RY * st.r * Math.sin(a);
+    }
+    if (st.free > 0) {
+      x = lerp(x, 560 + (k % 5) * 140 + 55 * Math.sin(st.w * 0.9 + k * 1.7), st.free);
+      y = lerp(y, 350 + Math.floor(k / 5) * 140 + 40 * Math.sin(st.w * 0.7 + k * 1.3), st.free);
+    }
+    const rel = (y - CY) / RY;
+    return { x, y, back: st.free < 0.5 && (facing === 'in' ? rel > 0.5 : rel < -0.5) };
+  }
+
+  function leadPos(s, lb) {
+    const P = s.path, st = formState(s, lb), start = s.leadStart;
+    let tx = CX, ty = CY, dur = P.dur ?? 0.8;
+    if (P.mode === 'hold') return start;
+    if (P.mode === 'circle' || P.mode === 'slalom') {
+      const a = s.la0 + P.rate * lb;
+      // Slalom crosses the ring line in every gap, so the leader passes kids inside and outside in turn.
+      const R = P.mode === 'slalom' ? st.r : P.radius, off = P.mode === 'slalom' ? 40 * Math.cos(5 * (a - baseAngle(0) - st.rot)) : 0;
+      tx = CX + (RX * R + off) * Math.cos(a); ty = CY + (RY * R + off) * Math.sin(a);
+    } else if (P.mode === 'free') {
+      tx = CX + 150 * Math.sin(st.w * 0.55 + 1); ty = 432 + 62 * Math.sin(st.w * 0.83);
+    } else if (P.mode === 'toKid' || P.mode === 'nextTo') {
+      const kid = slotPos(s, lb, s.chosen, st);
+      if (P.mode === 'nextTo') { tx = kid.x + 58; ty = kid.y + 4; }
+      else { tx = lerp(kid.x, CX, 0.3); ty = lerp(kid.y, CY, 0.3) + 4; }
+      dur = P.dur ?? 1.6;
+    }
+    const t = ease(clamp(lb / dur));
+    return { x: lerp(start.x, tx, t), y: lerp(start.y, ty, t) };
+  }
+
+  function figPosRaw(s, lb, fig, st) {
+    if (fig === s.leaderFig) return { ...leadPos(s, lb), back: false };
+    return slotPos(s, lb, s.slotFig.indexOf(fig), st);
+  }
+  function figPos(s, lb, fig, st) {
+    const pos = figPosRaw(s, lb, fig, st), prev = segs[s.index - 1];
+    if (lb >= 1 || fig === s.leaderFig || !prev || prev.slotFig.indexOf(fig) === s.slotFig.indexOf(fig)) return pos;
+    const from = figPosRaw(prev, prev.len, fig), t = ease(clamp(lb));
+    return { x: lerp(from.x, pos.x, t), y: lerp(from.y, pos.y, t), back: pos.back };
+  }
+
+  let stoneHandoff = null;
+  function buildEngine() {
+    const end = { kind: 'end', leadKind: 'stand', label: 'VALMIS', words: ['Tubli!'], wordBeats: [0], act: 'Mäng on läbi. Kordame veel?', lead: null };
+    const plan = [{ ...GAME.intro, label: 'ALUSTAME', words: ['1', '2', '3', '4'], wordBeats: [0, 1, 2, 3] },
+      ...GAME.seq.map(([idx, label, extra]) => ({ ...GAME.lines[idx], ...extra, label, lineIndex: idx })), end];
+    let st = { r: GAME.r0 ?? 1, free: 0, ph: 0, rot: 0, w: 0, sw: 0 };
+    let leaderFig = GAME.noLeader ? null : 10, slotFig = [...Array(10).keys()];
+    for (const d of plan) {
+      const prev = segs[segs.length - 1];
+      const s = { len: 4, start: total, index: segs.length, form: {}, path: { mode: 'hold' }, ...d };
+      Object.assign(s, { rot0: st.rot, r0: st.r, r1: s.form.r ?? st.r, free0: st.free, free1: s.form.free ?? st.free, w0: st.w, ph0: st.ph, ph1: s.form.phase ?? st.ph, sw0: st.sw, leaderFig, slotFig: slotFig.slice() });
+      s.leadStart = !prev || leaderFig === null ? { x: CX, y: CY } : figPosRaw(prev, prev.len, leaderFig);
+      s.la0 = Math.atan2((s.leadStart.y - CY) / RY, (s.leadStart.x - CX) / RX);
+      segs.push(s); total += s.len;
+      const e = formState(s, s.len);
+      st = { r: e.r, free: e.free, ph: e.phase, rot: e.rot, w: e.w, sw: Math.round(e.swap) };
+      if (s.leadKind === 'giveStone') stoneHandoff = { beat: s.start + 2.8, from: s.leaderFig, to: s.slotFig[s.chosen] };
+      if (s.swapAfter) [leaderFig, slotFig[s.chosen]] = [slotFig[s.chosen], leaderFig];
+    }
+  }
+  if (ENGINE) buildEngine();
+
+  const REST = { lx: -58, ly: -96, rx: 58, ry: -96, step: 0, jump: 0, mouth: 0.05, fingers: 0, palms: 0, dough: 0, mega: 0, feet: 0, squat: 0, bob: 0, clapFx: 0, clapping: 0, bite: 0, elbowLow: 0, seated: 0, tail: 0, eyes: 0, pine: 0, fist: 0, knockFx: 0, walk: 0, sleep: 0, point: 0, shush: 0, brow: 0, open: 0, gold: 0, sway: 0 };
+  const clapSep = k => k < 0.12 ? 0 : Math.pow(Math.sin(Math.PI * (k - 0.12) / 0.88), 0.7);
+  const singMouth = lb => lb >= 3 ? 0.08 : 0.2 + 0.45 * Math.abs(Math.sin(Math.PI * 2 * lb));
+  const toward = (k, x, y) => ({ lx: lerp(REST.lx, -x, k), ly: lerp(REST.ly, y, k), rx: lerp(REST.rx, x, k), ry: lerp(REST.ry, y, k) });
+
+  const POSES = {
+    intro: lb => isSquirrel ? { ...REST, seated: 1 - ease(clamp((lb - 2.5) / 1.1)) } : REST,
+    end: () => ({ ...REST, mouth: 0.15 }),
+    knock(lb) {
+      const phase = lb % 1, lift = Math.pow(Math.sin(Math.PI * phase), 2);
+      return { ...REST, lx: -5, ly: -176, rx: 0, ry: -190 - 40 * lift, fist: 1, elbowLow: 1, knockFx: Math.max(0, 1 - phase / 0.22), mouth: singMouth(lb) };
+    },
+    peel(lb) { return { ...POSES.roll(lb), dough: 0 }; },
+    tailEyes(lb) {
+      const eyes = ease(clamp((lb - 1.65) / 0.35));
+      const wave = 12 * Math.sin(TAU * lb);
+      return { ...REST, lx: lerp(-52 + wave, -22, eyes), ly: lerp(-135, -296, eyes), rx: lerp(52 + wave, 22, eyes), ry: lerp(-135, -296, eyes), tail: 1 - eyes, eyes, mouth: singMouth(lb) };
+    },
+    pine(lb) {
+      const raised = ease(clamp(lb / 0.35));
+      return { ...REST, ...toward(raised, 9, -351), pine: raised, feet: 1, jump: lb >= 0.2 && lb < 0.9 ? 45 * Math.sin(Math.PI * (lb - 0.2) / 0.7) : 0, mouth: singMouth(lb) };
+    },
+    wander(lb) {
+      const swing = Math.sin(TAU * lb);
+      return { ...REST, lx: -64 - 10 * swing, rx: 64 - 10 * swing, ly: -112 + 13 * swing, ry: -112 - 13 * swing, walk: 1, bob: 4 * Math.abs(swing), mouth: singMouth(lb) };
+    },
+    alternate(lb) {
+      const wave = Math.cos(Math.PI * lb), left = (wave + 1) / 2;
+      return { ...REST, lx: -78, rx: 78, ly: lerp(-105, -334, left), ry: lerp(-334, -105, left), mouth: singMouth(lb) };
+    },
+    clap(lb) {
+      let sep;
+      if (lb < 2) sep = clapSep(lb % 1);
+      else sep = 0.4 * ease(clamp((lb - 2.3) / 0.6));
+      let fx = 0;
+      for (const n of [0, 1, 2]) { const d = lb - n; if (d >= 0 && d < 0.35) fx = Math.max(fx, 1 - d / 0.35); }
+      const x = 7 + 52 * sep, y = -182 + 6 * sep;
+      return { ...REST, lx: -x, ly: y, rx: x, ry: y, mouth: singMouth(lb), clapFx: fx, clapping: 1 };
+    },
+    roll(lb) {
+      const th = TAU * lb + Math.PI / 2, r = 24;
+      return { ...REST, lx: -13 + r * Math.cos(th), ly: -178 + r * Math.sin(th), rx: 13 + r * Math.cos(th + Math.PI), ry: -178 + r * Math.sin(th + Math.PI), dough: 1, mouth: singMouth(lb) };
+    },
+    sugar(lb) {
+      const u = ease(clamp((lb - 0.15) / 3.5));
+      const phi = (14 + 124 * u) * Math.PI / 180, R = 128;
+      const x = 42 + R * Math.sin(phi), y = -218 - R * Math.cos(phi);
+      return { ...REST, lx: -x, ly: y, rx: x, ry: y, fingers: 1, mouth: singMouth(lb) };
+    },
+    oven(lb) {
+      const k = ease(clamp(lb / 0.8)) * (1 - ease(clamp((lb - 3.0) / 0.9)));
+      return { ...REST, ...toward(k, 34, -168), step: k, palms: clamp(k * 1.6), mouth: singMouth(lb) };
+    },
+    eat(lb) {
+      const k = ease(clamp(lb / 0.5)), w = Math.sin(TAU * 2 * lb);
+      const p = toward(k, 13, -238);
+      return { ...REST, ...p, ly: p.ly + 7 * w * k, ry: p.ry - 7 * w * k, mouth: 0.15 + 0.6 * (0.5 + 0.5 * w), bite: k * (1 - 0.75 * clamp(lb / 8)), elbowLow: k };
+    },
+    nam(lb) { return { ...POSES.eat(lb + 4), bob: 5 * Math.abs(Math.sin(TAU * lb)) }; },
+    shout(lb) {
+      const k = ease(clamp(lb / 0.5));
+      const jump = lb >= 2 && lb < 2.7 ? Math.sin(Math.PI * (lb - 2) / 0.7) : 0;
+      const squat = lb > 1.75 && lb < 2 ? Math.sin(Math.PI * (lb - 1.75) / 0.25) : (lb >= 2.7 && lb < 2.95 ? Math.sin(Math.PI * (lb - 2.7) / 0.25) : 0);
+      return { ...REST, ...toward(k, 22, -262), mega: k, feet: ease(clamp(lb / 1.5)), jump: 75 * jump, squat: 10 * squat, mouth: lb >= 2 && lb < 3.2 ? 1 : singMouth(lb) * 0.8 };
+    },
+  };
+
+  const CROUCH = { ...REST, seated: 1, lx: -56, ly: -104, rx: 56, ry: -104 };
+  const mixPose = (a, b, t) => { const m = {}; for (const k in a) m[k] = lerp(a[k], b[k], t); return m; };
+  const jumpAt = (lb, t, dur = 0.7) => lb >= t && lb < t + dur ? Math.sin(Math.PI * (lb - t) / dur) : 0;
+  const hands = (lx, ly, rx, ry) => ({ lx, ly, rx, ry });
+  function eyesPose(lb, seated) {
+    const k = ease(clamp(lb / 0.35)), rub = 5 * ease(clamp(lb - 1)), a = TAU * 2 * lb;
+    const from = seated ? CROUCH : REST;
+    return { ...from, lx: lerp(from.lx, -20 + rub * Math.cos(a), k), ly: lerp(from.ly, -294 + rub * Math.sin(a), k), rx: lerp(from.rx, 20 - rub * Math.cos(a), k), ry: lerp(from.ry, -294 + rub * Math.sin(a), k), open: k, elbowLow: k, mouth: singMouth(lb) };
+  }
+
+  function riseJump(hx, hy, height) {
+    return lb => {
+      const up = ease(clamp((lb - 0.4) / 0.6));
+      return { ...REST, seated: 1 - up, ...hands(lerp(-56, -hx, up), lerp(-104, hy, up), lerp(56, hx, up), lerp(-104, hy, up)), feet: 1, jump: height * jumpAt(lb, 3, 0.8), mouth: singMouth(lb) };
+    };
+  }
+
+  Object.assign(POSES, {
+    stand: lb => ({ ...REST, mouth: singMouth(lb) }),
+    idle: lb => ({ ...REST, bob: 3 * Math.abs(Math.sin(Math.PI * lb)), mouth: singMouth(lb) }),
+    crouch: () => ({ ...CROUCH }),
+    standHold: lb => ({ ...REST, ...hands(-92, -128, 92, -128), mouth: singMouth(lb) }),
+    holdWalk: lb => ({ ...REST, ...hands(-92, -128, 92, -128), walk: 1, bob: 4 * Math.abs(Math.sin(TAU * lb)), mouth: singMouth(lb) }),
+    roam: POSES.wander,
+    wings(lb) {
+      const th = lerp(55, 118, (Math.sin(TAU * 2 * lb) + 1) / 2) * Math.PI / 180, x = 42 + 124 * Math.sin(th), y = -218 + 124 * Math.cos(th);
+      return { ...REST, ...hands(-x, y, x, y), fingers: 0.9, mouth: singMouth(lb) };
+    },
+    flyFree: lb => ({ ...POSES.wings(lb), walk: 1, bob: 4 * Math.abs(Math.sin(TAU * lb)) }),
+    vurr: lb => ({ ...POSES.flyFree(lb), mouth: 0.55 + 0.1 * Math.sin(TAU * 6 * lb) }),
+    hop2: lb => ({ ...REST, ...hands(-70, -150, 70, -150), feet: 1, jump: 42 * (jumpAt(lb, 0) + jumpAt(lb, 1)), mouth: singMouth(lb) }),
+    gate: lb => ({ ...REST, ...hands(-96, -338, 96, -338), mouth: singMouth(lb) }),
+    squatHold: lb => ({ ...REST, seated: ease(clamp(lb / 0.9)), ...hands(-90, -120, 90, -120), mouth: singMouth(lb) }),
+    bunny: lb => ({ ...CROUCH, ...hands(-16, -196, 16, -196), elbowLow: 1, jump: 24 * Math.sin(Math.PI * clamp((lb % 1) / 0.6)), mouth: singMouth(lb) }),
+    arrive: lb => mixPose(POSES.wander(lb), POSES.stand(lb), ease(clamp((lb - 1) / 0.5))),
+    sleep: lb => ({ ...CROUCH, ...hands(-36, -272, -14, -266), elbowLow: 1, sleep: 1, mouth: 0.05, bob: 2 * Math.sin(Math.PI * lb) }),
+    crouchStretch(lb) { const k = ease(clamp(lb / 0.8)); return { ...CROUCH, ...hands(lerp(-56, -44, k), lerp(-104, -352, k), lerp(56, 44, k), lerp(-104, -352, k)), mouth: singMouth(lb) }; },
+    wake(lb) {
+      const up = ease(clamp(lb / 1.2)), arms = ease(clamp((lb - 0.5) / 1));
+      return { ...REST, seated: 1 - up, ...hands(lerp(-56, -44, arms), lerp(-104, -352, arms), lerp(56, 44, arms), lerp(-104, -352, arms)), bob: 8 * arms * up, mouth: singMouth(lb) };
+    },
+    eyes: lb => eyesPose(lb, 0),
+    eyesCrouch: lb => ({ ...eyesPose(lb, 1), seated: 1 }),
+    wolfWake(lb) {
+      const up = ease(clamp((lb - 0.3) / 1.2)), arms = ease(clamp((lb - 1.3) / 0.9));
+      return { ...REST, seated: 1 - up, sleep: lb < 0.5 ? 1 : 0, ...hands(lerp(-36, -44, arms), lerp(-272, -352, arms), lerp(-14, 44, arms), lerp(-266, -352, arms)), bob: 6 * arms, mouth: 0.15 + 0.6 * arms * (1 - ease(clamp((lb - 3) / 0.6))) };
+    },
+    sneak: lb => ({ ...REST, ...hands(-30, -222, 30, -222), elbowLow: 1, walk: 0.7, squat: 16, bob: 3 * Math.abs(Math.sin(TAU * lb)), fingers: 0.6, mouth: 0.08 }),
+    sneakSmall: lb => ({ ...REST, ...hands(-40, -205, 40, -205), elbowLow: 1, walk: 0.55, squat: 10, mouth: singMouth(lb) }),
+    takeHand(lb) { const k = ease(clamp((lb - 1.3) / 0.5)); return mixPose(POSES.wander(lb), { ...REST, ...hands(-96, -150, 62, -300 + 14 * Math.sin(TAU * 2 * lb)), mouth: 0.3 }, k); },
+    takenHand(lb) { const k = ease(clamp((lb - 1.3) / 0.5)); return mixPose(POSES.wander(lb), { ...REST, ...hands(-58, -100, 96, -150), mouth: 0.45 }, k); },
+    crouchLate: lb => mixPose(POSES.wander(lb), CROUCH, ease(clamp((lb - 1.8) / 0.5))),
+    goSleep: lb => mixPose(POSES.wander(lb), POSES.sleep(lb), ease(clamp((lb - 2) / 0.6))),
+    search(lb) {
+      const k = ease(clamp(lb / 0.5));
+      return { ...REST, ...hands(lerp(-58, -50, k), lerp(-96, -150, k), lerp(58, 30, k), lerp(-96, -318, k)), brow: k, sway: 14 * Math.sin(Math.PI * lb), mouth: singMouth(lb) };
+    },
+    searchCrouch: lb => ({ ...POSES.search(lb), seated: 1 }),
+    spines(lb) { const k = ease(clamp(lb / 0.5)); return { ...REST, ...toward(k, 66, -330), fingers: 1, mouth: singMouth(lb) }; },
+    tap(lb) {
+      const ph = lb % 1, t = Math.pow(Math.sin(Math.PI * ph), 2);
+      return { ...REST, rx: 30 + 18 * t, ry: -214 - 8 * t, point: 1, elbowLow: 1, knockFx: Math.max(0, 1 - ph / 0.22), mouth: singMouth(lb) };
+    },
+    headClap(lb) {
+      const k = lb % 1, sep = clapSep(k), x = 6 + 44 * sep, y = -344 + 8 * sep;
+      return { ...REST, ...hands(-x, y, x, y), clapFx: k < 0.35 ? 1 - k / 0.35 : 0, clapping: 1, mouth: singMouth(lb) };
+    },
+    pull: lb => ({ ...REST, ...hands(-40, -178, 40, -178), walk: 0.5, mouth: singMouth(lb) }),
+    release: (lb, s, info) => info && info.slot & 1 ? POSES.wander(lb) : POSES.stand(lb),
+    hideShush(lb) {
+      const k = ease(clamp(lb / 0.8)), sh = ease(clamp((lb - 2) / 0.4));
+      return { ...REST, seated: k, ...hands(-90, -120, lerp(90, 6, sh), lerp(-120, -262, sh)), shush: sh, point: sh, elbowLow: sh, mouth: 0.05 };
+    },
+    leaderRise: lb => ({ ...mixPose(CROUCH, REST, ease(clamp(lb / 3.4))), mouth: singMouth(lb) }),
+    leaderReach(lb) { const k = ease(clamp(lb / 0.8)); return { ...REST, ...toward(k, 30, -362), bob: 10 * k, mouth: singMouth(lb) }; },
+    dance(lb) {
+      const w = Math.sin(TAU * lb);
+      return { ...REST, jump: 22 * Math.sin(Math.PI * clamp((lb % 1) / 0.55)), ...hands(-72, -250 + 55 * w, 72, -250 - 55 * w), sway: 10 * Math.sin(Math.PI * lb), mouth: singMouth(lb) };
+    },
+    beckon(lb) { const c = Math.sin(TAU * 2 * lb); return { ...REST, ...hands(-46 + 8 * c, -186, 46 - 8 * c, -186), fingers: 0.55 + 0.45 * (0.5 + 0.5 * c), mouth: singMouth(lb) }; },
+    quickSquat: lb => ({ ...mixPose(REST, CROUCH, ease(clamp(lb / 0.4))), mouth: singMouth(lb) }),
+    hipsJump2: lb => ({ ...REST, ...toward(ease(clamp(lb / 0.3)), 52, -150), feet: 1, jump: 40 * (jumpAt(lb, 0.2) + jumpAt(lb, 2)), mouth: singMouth(lb) }),
+    chooseRun(lb) {
+      const run = mixPose(POSES.wander(lb * 1.4), POSES.stand(lb), ease(clamp((lb - 2) / 0.4)));
+      return mixPose(run, { ...CROUCH, mouth: singMouth(lb) }, ease(clamp((lb - 2.75) / 0.3)));
+    },
+    ringRiseJump: riseJump(52, -150, 70),
+    ringRiseJumpFree: riseJump(70, -140, 60),
+    goldScatter(lb) {
+      const ph = lb % 1, o = ease(clamp(ph / 0.5)) - (ph > 0.5 ? ease(clamp((ph - 0.5) / 0.5)) : 0), x = lerp(12, 112, o), y = lerp(-176, -150, o);
+      const sq = ease(clamp(lb / 0.4));
+      return { ...REST, seated: sq, ...hands(-x, y, x, y), gold: sq * o, fingers: o, mouth: singMouth(lb) };
+    },
+    palmsShout(lb) { const k = ease(clamp(lb / 0.4)); return { ...REST, seated: 1, ...hands(lerp(-56, -34, k), lerp(-104, -168, k), lerp(56, 34, k), lerp(-104, -168, k)), open: k, mouth: lb >= 2.6 && lb < 3.7 ? 1 : singMouth(lb) }; },
+    giveStone(lb) {
+      const target = { ...REST, ...hands(-22, -150, 22, -150), open: 1, elbowLow: 1, mouth: singMouth(lb) };
+      return { ...mixPose(POSES.wander(lb), target, ease(clamp((lb - 1.7) / 0.5))), clapFx: lb >= 2.6 && lb < 3 ? 1 - (lb - 2.6) / 0.4 : 0 };
+    },
+  });
+
+  const FADE = 0.55;
+  function segAt(beat) {
+    for (let i = segs.length - 1; i >= 0; i--) if (beat >= segs[i].start) return i;
+    return 0;
+  }
+  function figInfo(s, fig) {
+    if (!ENGINE || fig < 0) return null;
+    const slot = s.slotFig.indexOf(fig);
+    return { leader: fig === s.leaderFig, slot, chosen: slot >= 0 && slot === s.chosen };
+  }
+  function kindFor(s, info) {
+    if (!info) return s.kind;
+    if (info.leader) return s.leadKind || 'stand';
+    return info.chosen && s.chosenKind ? s.chosenKind : s.kind;
+  }
+  function poseAt(beat, fig = -1) {
+    if (beat < 0) return REST;
+    const i = segAt(beat), s = segs[i], lb = beat - s.start, info = figInfo(s, fig);
+    const p = POSES[kindFor(s, info)](lb, s, info);
+    const next = segs[i + 1];
+    if (next && lb > s.len - FADE) {
+      const nextInfo = figInfo(next, fig);
+      const t = ease((lb - (s.len - FADE)) / FADE), q = POSES[kindFor(next, nextInfo)](0, next, nextInfo), m = {};
+      for (const k in p) m[k] = lerp(p[k], q[k], t);
+      return m;
+    }
+    return p;
+  }
+
+  const KIDS = [
+    { skin: '#F2C9A5', hair: '#E3B54A', shirt: '#E84C3D', pants: '#2F4C7E', style: 'pigtails' },
+    { skin: '#E0A982', hair: '#4A2E1E', shirt: '#2E9E6B', pants: '#3B3B58', style: 'short' },
+    { skin: '#F5D3B8', hair: '#C9692C', shirt: '#F2B705', pants: '#5A3E8C', style: 'curly' },
+    { skin: '#B97A55', hair: '#1F1A17', shirt: '#3D7DD8', pants: '#2C3E50', style: 'bun' },
+    { skin: '#F2C9A5', hair: '#7A4B2A', shirt: '#9B59B6', pants: '#1F6F5C', style: 'bob' },
+    { skin: '#F7D9C1', hair: '#F0D27A', shirt: '#16A3B8', pants: '#8C2F39', style: 'short' },
+    { skin: '#8D5B3E', hair: '#141110', shirt: '#F28C28', pants: '#2F4C7E', style: 'curly' },
+    { skin: '#EBC0A0', hair: '#5B3A22', shirt: '#D94F8C', pants: '#3B3B58', style: 'pigtails' },
+    { skin: '#F5D3B8', hair: '#A0522D', shirt: '#7CB342', pants: '#4A3B6B', style: 'bob' },
+    { skin: '#D69C77', hair: '#2B1C14', shirt: '#5C6BC0', pants: '#7A4E2D', style: 'bun' },
+  ];
+  const LEADER = { skin: '#F2C9A5', hair: '#8A4B22', shirt: '#E84C3D', pants: '#24406E', style: 'pigtails', stripe: true };
+
+  function elbowFor(sx, sy, hx, hy, L1, L2, low) {
+    let dx = hx - sx, dy = hy - sy, d = Math.hypot(dx, dy);
+    const maxD = L1 + L2 - 0.5;
+    if (d > maxD) { hx = sx + dx / d * maxD; hy = sy + dy / d * maxD; dx = hx - sx; dy = hy - sy; d = maxD; }
+    d = Math.max(d, Math.abs(L1 - L2) + 1);
+    const base = Math.atan2(dy, dx);
+    const a = Math.acos(clamp((L1 * L1 + d * d - L2 * L2) / (2 * L1 * d), -1, 1));
+    const e1 = [sx + L1 * Math.cos(base + a), sy + L1 * Math.sin(base + a)];
+    const e2 = [sx + L1 * Math.cos(base - a), sy + L1 * Math.sin(base - a)];
+    const outward = Math.sign(sx);
+    const [out, other] = e1[0] * outward > e2[0] * outward ? [e1, e2] : [e2, e1];
+    const lower = other[1] > out[1] ? other : out;
+    return { ex: lerp(out[0], lower[0], low), ey: lerp(out[1], lower[1], low), hx, hy };
+  }
+
+  const OUTLINE = 'rgba(110,60,40,0.55)';
+  function line(x1, y1, x2, y2, w, color) {
+    ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  }
+  function ellipse(x, y, rx, ry, color, rot = 0) {
+    ctx.fillStyle = color; ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rot, 0, TAU); ctx.fill();
+  }
+
+  function drawHair(look, back) {
+    const c = look.hair;
+    if (look.style === 'pigtails') { ellipse(-58, -292, 16, 22, c); ellipse(58, -292, 16, 22, c); }
+    if (look.style === 'bun') ellipse(0, -350, 22, 18, c);
+    if (look.style === 'bob' && back) { ctx.fillStyle = c; ctx.beginPath(); ctx.roundRect(-56, -300, 112, 48, 18); ctx.fill(); }
+    if (look.style === 'bob' && !back) { ctx.fillStyle = c; ctx.beginPath(); ctx.roundRect(-58, -300, 18, 52, 9); ctx.roundRect(40, -300, 18, 52, 9); ctx.fill(); }
+    if (back) { ellipse(0, -294, 54, 54, c); return; }
+    ctx.fillStyle = c;
+    if (look.style === 'curly') {
+      for (let i = 0; i < 9; i++) { const a = Math.PI * (1.02 + i * 0.12); ellipse(Math.cos(a) * 46, -296 + Math.sin(a) * 46, 16, 16, c); }
+    } else {
+      ctx.beginPath(); ctx.arc(0, -294, 55, Math.PI * 1.02, Math.PI * 1.98); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(-14, -322, 34, 16, -0.25, 0, TAU); ctx.fill();
+    }
+  }
+
+  function drawHand(x, y, pose, side, ex, ey, look, beat) {
+    if (pose.eyes > 0.65) {
+      ctx.strokeStyle = OUTLINE; ctx.lineWidth = 8;
+      ctx.beginPath(); ctx.ellipse(x, y, 13, 14, 0, 0, TAU); ctx.stroke();
+      ctx.strokeStyle = look.skin; ctx.lineWidth = 5.5; ctx.stroke();
+      for (let i = 0; i < 3; i++) {
+        line(x + side * (10 + i * 3), y - 7, x + side * (16 + i * 5), y - 19 + i * 3, 4, look.skin);
+      }
+      return;
+    }
+    if (pose.point > 0.5 && side > 0) {
+      ellipse(x, y, 12.5, 11.5, OUTLINE); ellipse(x, y, 11, 10, look.skin);
+      const a = pose.shush > 0.5 ? -Math.PI / 2 : -Math.PI / 2 + 0.75;
+      line(x, y - 4, x + Math.cos(a) * 24, y - 4 + Math.sin(a) * 24, 7.5, OUTLINE);
+      line(x, y - 4, x + Math.cos(a) * 24, y - 4 + Math.sin(a) * 24, 5.2, look.skin);
+      return;
+    }
+    if (pose.brow > 0.5 && side > 0) {
+      ellipse(x - 6, y, 22, 8.5, OUTLINE, 0.12); ellipse(x - 6, y, 20, 6.5, look.skin, 0.12);
+      return;
+    }
+    if (pose.fist > 0.5 && side > 0) {
+      ellipse(x, y, 13, 12, OUTLINE); ellipse(x, y, 11.5, 10.5, look.skin);
+      line(x - 6, y + 1, x + 5, y + 1, 1.5, OUTLINE);
+      ellipse(x + 7, y + 4, 4, 6, look.skin);
+      return;
+    }
+    ctx.save(); ctx.translate(x, y);
+    const flat = pose.palms > 0.5 || pose.open > 0.5 || (pose.fist > 0.5 && side < 0);
+    const cupped = pose.mega > 0.5;
+    const angle = pose.pine > 0.5 ? -Math.PI / 2 - side * 0.4 : flat ? (side < 0 ? 0 : Math.PI) :
+      cupped ? -Math.PI / 2 + side * 0.35 :
+      lerp(Math.atan2(y - ey, x - ex), -Math.PI / 2, pose.clapping);
+    ctx.rotate(angle); ctx.scale(1, side);
+    // The wrist overlaps the forearm; the thumb stays inside the gesture.
+    const palm = new Path2D();
+    palm.moveTo(-9, -6);
+    palm.bezierCurveTo(-3, -8, 5, -10, 12, -7);
+    palm.bezierCurveTo(20, -4, 20, 5, 12, 8);
+    palm.bezierCurveTo(7, 10, 2, 8, -2, 6);
+    palm.lineTo(-9, 6); palm.closePath();
+    ctx.scale(1, flat ? 0.65 : 1);
+    ctx.fillStyle = look.skin; ctx.strokeStyle = OUTLINE; ctx.lineWidth = 1.6;
+    ctx.lineJoin = 'round'; ctx.fill(palm); ctx.stroke(palm);
+    if (pose.fingers > 0.01) {
+      for (let i = 0; i < 4; i++) {
+        const spread = (i - 1.5) * 0.24 * pose.fingers;
+        const wiggle = Math.sin(beat * TAU * 3 + i * 1.7 + side) * 0.12 * pose.fingers;
+        const a = spread + wiggle, fy = (i - 1.5) * 4;
+        const length = [10, 15, 14, 9][i] * pose.fingers;
+        const tipX = 10 + Math.cos(a) * length, tipY = fy + Math.sin(a) * length;
+        line(8, fy, tipX, tipY, 5.8, OUTLINE);
+        line(8, fy, tipX, tipY, 3.8, look.skin);
+      }
+    } else {
+      line(12, -3, 15, -2, 1.1, 'rgba(110,60,40,0.2)');
+      line(12, 1, 15, 2, 1.1, 'rgba(110,60,40,0.2)');
+    }
+    line(-1, 4, 5, 12, 7.5, OUTLINE);
+    line(-1, 4, 5, 12, 5.5, look.skin);
+    ctx.restore();
+  }
+
+  function drawCake(x, y, s) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    ctx.fillStyle = '#C47A35'; ctx.beginPath(); ctx.arc(0, 0, 26, Math.PI, 0); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#E39A4C'; ctx.beginPath(); ctx.ellipse(0, 0, 27, 6, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    for (const [dx, dy] of [[-12, -10], [0, -18], [11, -9], [-4, -6], [6, -14]]) ellipse(dx, dy, 2.6, 2.6, '#FFFFFF');
+    ctx.restore();
+  }
+
+  function sugarFrom(beat, kidScaleFn) {
+    const i = segAt(beat), s = segs[i];
+    const out = [];
+    if (!(s.kind === 'sugar' || (segs[i - 1] && segs[i - 1].kind === 'sugar' && beat - s.start < 1.4))) return out;
+    const sugarSeg = s.kind === 'sugar' ? s : segs[i - 1];
+    for (let ts = sugarSeg.start + 0.3; ts < sugarSeg.start + 3.7; ts += 0.09) {
+      const age = beat - ts;
+      if (age < 0 || age > 1.3) continue;
+      const p = poseAt(ts);
+      const seed = Math.sin(ts * 91.7) * 0.5 + 0.5;
+      for (const side of [-1, 1]) {
+        const hx = side < 0 ? p.lx : p.rx, hy = side < 0 ? p.ly : p.ry;
+        out.push([hx + side * (8 + 26 * seed) * age, hy + 18 + 70 * age + 90 * age * age, 1 - age / 1.3]);
+      }
+    }
+    return out;
+  }
+
+  function drawKid(look, x, y, s, back, beat, opts = {}) {
+    const p = opts.pose ?? poseAt(beat, opts.fig ?? -1);
+    const lift = p.jump - p.squat + p.bob;
+    ctx.save();
+    ctx.translate(x, y); ctx.scale(s, s); ctx.translate(p.sway, 0);
+    ellipse(0, 2, 44 * (1 - p.jump / 220), 11 * (1 - p.jump / 220), 'rgba(30,43,71,0.18)');
+    ctx.translate(0, -lift);
+
+    const fx = lerp(24, 12, p.feet), stride = Math.sin(TAU * beat) * 19 * p.walk;
+    const hipY = -112 + p.squat * 0.6 + p.seated * 75;
+    const leftFoot = lerp(-fx + stride, 24, p.seated), rightFoot = lerp(fx - stride, -24, p.seated);
+    if (p.seated > 0.01) {
+      const kneeX = lerp(fx, 64, p.seated), kneeY = lerp(-55, -24, p.seated);
+      line(-18, hipY, -kneeX, kneeY, 30, look.pants); line(-kneeX, kneeY, leftFoot, -10, 27, look.pants);
+      line(18, hipY, kneeX, kneeY, 30, look.pants); line(kneeX, kneeY, rightFoot, -10, 27, look.pants);
+    } else {
+      line(-18, hipY, leftFoot, -10, 30, look.pants);
+      line(18, hipY, rightFoot, -10, 30, look.pants);
+    }
+    ellipse(leftFoot - 4, -4, 20, 11, '#2A2A35');
+    ellipse(rightFoot + 4, -4, 20, 11, '#2A2A35');
+    ctx.translate(0, p.seated * 75);
+
+    const S = [[-42, -218], [42, -218]];
+    const hands = [[p.lx, p.ly], [p.rx, p.ry]];
+    const arms = S.map((sh, i) => elbowFor(sh[0], sh[1], hands[i][0], hands[i][1], 56, 78, p.elbowLow));
+    const drawArms = () => arms.forEach((a, i) => {
+      const [sx, sy] = S[i];
+      const before = [lerp(a.ex, sx, 0.18), lerp(a.ey, sy, 0.18)];
+      const after = [lerp(a.ex, a.hx, 0.18), lerp(a.ey, a.hy, 0.18)];
+      const arm = new Path2D();
+      arm.moveTo(sx, sy); arm.lineTo(...before);
+      arm.quadraticCurveTo(a.ex, a.ey, ...after); arm.lineTo(a.hx, a.hy);
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.strokeStyle = OUTLINE; ctx.lineWidth = 19; ctx.stroke(arm);
+      ctx.strokeStyle = look.skin; ctx.lineWidth = 16; ctx.stroke(arm);
+      line(lerp(a.ex, a.hx, 0.55), lerp(a.ey, a.hy, 0.55), a.hx, a.hy, 13, look.skin);
+      const cuffX = lerp(sx, a.ex, 0.4), cuffY = lerp(sy, a.ey, 0.4);
+      line(sx, sy, cuffX, cuffY, 27, look.shirt);
+      const normal = Math.atan2(a.ey - sy, a.ex - sx) + Math.PI / 2;
+      line(cuffX + Math.cos(normal) * 10, cuffY + Math.sin(normal) * 10,
+        cuffX - Math.cos(normal) * 10, cuffY - Math.sin(normal) * 10, 2.5, 'rgba(255,255,255,0.3)');
+    });
+
+    if ((back && p.tail < 0.5) || (!back && p.tail >= 0.5)) {
+      drawArms();
+      if (p.tail >= 0.5) arms.forEach((a, i) => drawHand(a.hx, a.hy, p, i ? 1 : -1, a.ex, a.ey, look, beat));
+    }
+    ctx.fillStyle = look.shirt; ctx.beginPath(); ctx.roundRect(-48, -234, 96, 136, 28); ctx.fill();
+    if (look.stripe) { ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fillRect(-48, -178, 96, 12); }
+    ctx.fillStyle = look.skin; ctx.fillRect(-12, -246, 24, 16);
+
+    if (back) {
+      if (p.tail >= 0.5) {
+        drawArms();
+        arms.forEach((a, i) => drawHand(a.hx, a.hy, p, i ? 1 : -1, a.ex, a.ey, look, beat));
+      }
+      ellipse(-53, -292, 7, 11, look.skin); ellipse(53, -292, 7, 11, look.skin);
+      drawHair(look, true);
+      drawRoleMarks(opts, true);
+      if (p.tail < 0.5) arms.forEach((a, i) => { if (a.hy < -300 || Math.abs(a.hx) > 62) drawHand(a.hx, a.hy, p, i ? 1 : -1, a.ex, a.ey, look, beat); });
+    } else {
+      if (look.style === 'bob') { ctx.fillStyle = look.hair; ctx.beginPath(); ctx.roundRect(-60, -310, 120, 66, 24); ctx.fill(); }
+      ellipse(0, -292, 52, 52, look.skin);
+      drawHair(look, false);
+      drawRoleMarks(opts, false);
+      if (p.sleep > 0.5) {
+        ctx.strokeStyle = '#1E2B47'; ctx.lineWidth = 3.5; ctx.lineCap = 'round';
+        for (const ex of [-19, 19]) { ctx.beginPath(); ctx.arc(ex, -298, 8, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke(); }
+      } else {
+        ellipse(-19, -296, 5.5, 7, '#1E2B47'); ellipse(19, -296, 5.5, 7, '#1E2B47');
+      }
+      ellipse(-30, -276, 9, 6, 'rgba(232,90,90,0.28)'); ellipse(30, -276, 9, 6, 'rgba(232,90,90,0.28)');
+      if (p.mouth < 0.12) {
+        ctx.strokeStyle = '#8A2E2E'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.arc(0, -276, 12, 0.2 * Math.PI, 0.8 * Math.PI); ctx.stroke();
+      } else {
+        ellipse(0, -266, 7 + 6 * p.mouth, 3 + 11 * p.mouth, '#8A2E2E');
+      }
+      if (p.dough > 0.5) ellipse((p.lx + p.rx) / 2, (p.ly + p.ry) / 2, 15, 13, '#F1D7A0');
+      if (p.tail < 0.5) {
+        drawArms();
+        arms.forEach((a, i) => drawHand(a.hx, a.hy, p, i ? 1 : -1, a.ex, a.ey, look, beat));
+      }
+      if (opts.stone && Math.abs(p.rx - p.lx) < 90) drawStone((p.lx + p.rx) / 2, (p.ly + p.ry) / 2 - 6);
+      if (p.knockFx > 0) {
+        for (const side of [-1, 1]) line(side * 24, -192, side * 34, -198, 3 * p.knockFx, '#D99A25');
+      }
+      if (p.bite > 0.05) drawCake((p.lx + p.rx) / 2, Math.min(p.ly, p.ry) - 4, 0.6 * p.bite);
+      if (p.palms > 0.5) drawCake((p.lx + p.rx) / 2, Math.min(p.ly, p.ry) - 6, clamp((p.palms - 0.5) * 2));
+      if (p.clapFx > 0) {
+        const cx = (p.lx + p.rx) / 2, cy = (p.ly + p.ry) / 2;
+        ctx.strokeStyle = `rgba(242,183,5,${p.clapFx})`; ctx.lineWidth = 6; ctx.lineCap = 'round';
+        for (let i = 0; i < 6; i++) {
+          const a = -Math.PI / 2 + (i - 2.5) * 0.55, r1 = 30 + (1 - p.clapFx) * 10, r2 = r1 + 22;
+          ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1); ctx.lineTo(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2); ctx.stroke();
+        }
+      }
+    }
+
+    if (p.gold > 0.3) {
+      for (const [hx, hy, side] of [[p.lx, p.ly, -1], [p.rx, p.ry, 1]]) for (let j = 0; j < 6; j++) {
+        const t = (beat * 2 + j / 6) % 1, r = 2 + 5 * (1 - t);
+        ellipse(hx + side * (10 + 70 * t), hy - 10 - 30 * t + 50 * t * t, r, r, `rgba(242,183,5,${(1 - t) * p.gold})`);
+      }
+    }
+    if (p.sleep > 0.5 && !back) {
+      ctx.font = '800 40px "Baloo 2", "Trebuchet MS", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(30,43,71,0.8)'; ctx.fillStyle = '#FFFFFF';
+      const zy = -360 - 10 * ((beat % 2) / 2);
+      ctx.strokeText('z', 40, zy); ctx.fillText('z', 40, zy);
+      ctx.font = '800 28px "Baloo 2", "Trebuchet MS", sans-serif';
+      ctx.strokeText('z', 70, zy - 30); ctx.fillText('z', 70, zy - 30);
+    }
+    const sugar = sugarFrom(beat);
+    for (const [sx, sy, a] of sugar) {
+      ctx.fillStyle = `rgba(255,255,255,${a})`; ctx.strokeStyle = `rgba(120,135,160,${a * 0.6})`; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.rect(sx - 3.5, sy - 3.5 + lift, 7, 7); ctx.fill(); ctx.stroke();
+    }
+    ctx.restore();
+    return { headTop: y - (345 + lift - p.seated * 75) * s, p };
+  }
+
+  function drawRoleMarks(opts, back) {
+    if (opts.mark === 'wolf') {
+      for (const sx of [-1, 1]) {
+        ctx.fillStyle = '#6F7686'; ctx.beginPath(); ctx.moveTo(sx * 18, -336); ctx.lineTo(sx * 44, -396); ctx.lineTo(sx * 56, -318); ctx.closePath(); ctx.fill();
+        if (!back) { ctx.fillStyle = '#E8B4B8'; ctx.beginPath(); ctx.moveTo(sx * 28, -336); ctx.lineTo(sx * 44, -378); ctx.lineTo(sx * 50, -326); ctx.closePath(); ctx.fill(); }
+      }
+    }
+    if (opts.mark === 'crown') {
+      ctx.fillStyle = '#F2B705'; ctx.strokeStyle = '#B07A00'; ctx.lineWidth = 3; ctx.lineJoin = 'round';
+      ctx.beginPath(); ctx.moveTo(-34, -336); ctx.lineTo(-40, -380); ctx.lineTo(-18, -356); ctx.lineTo(0, -388); ctx.lineTo(18, -356); ctx.lineTo(40, -380); ctx.lineTo(34, -336); ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      ellipse(0, -350, 5, 5, '#E84C3D');
+    }
+  }
+
+  function drawStone(x, y) {
+    ellipse(x, y, 16, 12, '#4B3F78');
+    ellipse(x - 6, y - 3, 4, 3, '#F2B705'); ellipse(x + 6, y + 2, 3.5, 3, '#E84C3D');
+    ellipse(x + 2, y - 6, 3, 2.5, '#16A3B8'); ellipse(x - 4, y + 5, 3, 2, '#7CB342');
+  }
+
+  function bubble(x, y, text, size, pop) {
+    if (pop <= 0) return;
+    ctx.save(); ctx.translate(x, y); ctx.scale(pop, pop);
+    ctx.font = `800 ${size}px "Baloo 2", "Trebuchet MS", sans-serif`;
+    const w = ctx.measureText(text).width + size * 1.1, h = size * 1.5;
+    ctx.fillStyle = '#FFFFFF'; ctx.strokeStyle = '#1E2B47'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.roundRect(-w / 2, -h / 2, w, h, h / 2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-w * 0.2, h / 2 - 2); ctx.lineTo(-w * 0.32, h / 2 + 18); ctx.lineTo(-w * 0.05, h / 2 - 2); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-w * 0.2, h / 2); ctx.lineTo(-w * 0.32, h / 2 + 18); ctx.lineTo(-w * 0.05, h / 2); ctx.stroke();
+    ctx.fillStyle = '#1E2B47'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(text, 0, 2);
+    ctx.restore();
+  }
+
+  const garlandX = t => lerp(560, W + 10, t);
+  const garlandY = t => (1 - t) * (1 - t) * 118 + 2 * (1 - t) * t * 178 + t * t * 112;
+  function drawRoom(beat) {
+    const room = GAME.room;
+    const wall = ctx.createLinearGradient(0, 0, 0, 300);
+    wall.addColorStop(0, room.wall[0]); wall.addColorStop(1, room.wall[1]);
+    ctx.fillStyle = wall; ctx.fillRect(0, 0, W, 300);
+    const floor = ctx.createLinearGradient(0, 300, 0, 590);
+    floor.addColorStop(0, room.floor?.[0] ?? '#E2B979'); floor.addColorStop(1, room.floor?.[1] ?? '#D9A964');
+    ctx.fillStyle = floor; ctx.fillRect(0, 300, W, 290);
+    ctx.strokeStyle = 'rgba(140,90,40,0.18)'; ctx.lineWidth = 2;
+    for (let y = 330; y < 590; y += 36) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+    room.backdrop?.(beat);
+    const flags = room.flags;
+    ctx.strokeStyle = 'rgba(30,43,71,0.35)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(560, 118); ctx.quadraticCurveTo(900, 178, W + 10, 112); ctx.stroke();
+    for (let n = 0; n < 14; n++) {
+      const t = (n + 0.5) / 14, x0 = garlandX(t), y0 = garlandY(t);
+      ctx.fillStyle = flags[n % flags.length];
+      ctx.beginPath(); ctx.moveTo(x0 - 15, y0); ctx.lineTo(x0 + 15, y0); ctx.lineTo(x0, y0 + 30); ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = '#B5363B'; ctx.fillRect(0, 286, W, 16);
+    ctx.fillStyle = '#F4E3B5';
+    for (let x = 0; x < W; x += 24) {
+      ctx.beginPath(); ctx.moveTo(x, 294); ctx.lineTo(x + 6, 289); ctx.lineTo(x + 12, 294); ctx.lineTo(x + 6, 299); ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = '#2F4C7E';
+    for (let x = 12; x < W; x += 24) ellipse(x + 6, 294, 2, 2, '#2F4C7E');
+
+    ellipse(215, 548, 165, 36, room.rug[0]);
+    ellipse(215, 548, 145, 29, room.rug[1]);
+    room.decor?.(beat);
+  }
+
+  function drawBird(x, y, body, head, s = 1, cheek = false) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    ctx.fillStyle = body; ctx.beginPath(); ctx.moveTo(-12, -2); ctx.lineTo(-25, -9); ctx.lineTo(-21, 3); ctx.closePath(); ctx.fill();
+    ellipse(0, 0, 14, 9.5, body); ellipse(10, -8, 7.5, 7.5, head);
+    if (cheek) ellipse(11, -6, 4, 3.5, '#FFFFFF');
+    ellipse(13, -10, 1.7, 1.7, '#FFFFFF'); ellipse(13.3, -10, 0.9, 0.9, '#1E2B47');
+    ctx.fillStyle = '#E39A4C'; ctx.beginPath(); ctx.moveTo(17, -9); ctx.lineTo(24, -7); ctx.lineTo(17, -5); ctx.closePath(); ctx.fill();
+    line(-2, 8, -4, 13, 2, '#9A7A50'); line(3, 8, 3, 13, 2, '#9A7A50');
+    ctx.restore();
+  }
+  function drawBirds(beat) {
+    for (const [t, body, head, cheek] of [[0.2, '#F2C230', '#1F1F1F', true], [0.5, '#A87A4F', '#7B5A3A', false], [0.8, '#B8956A', '#94754F', false]]) {
+      drawBird(garlandX(t), garlandY(t) - 12, body, head, 1, cheek);
+    }
+    const sx = 640 + 40 * Math.sin(beat * 0.6), sy = 70 + 8 * Math.sin(beat * 2);
+    ctx.fillStyle = '#2F4C7E'; ctx.beginPath();
+    const flap = 10 * Math.sin(beat * TAU);
+    ctx.moveTo(sx - 26, sy - flap); ctx.quadraticCurveTo(sx - 8, sy - 4, sx, sy + 4); ctx.quadraticCurveTo(sx + 8, sy - 4, sx + 26, sy - flap);
+    ctx.quadraticCurveTo(sx + 8, sy + 2, sx, sy + 10); ctx.quadraticCurveTo(sx - 8, sy + 2, sx - 26, sy - flap); ctx.fill();
+  }
+  function drawNight(beat) {
+    for (let n = 0; n < 34; n++) {
+      const x = (n * 197.3) % 1260 + 10, y = 18 + (n * 83.7) % 240;
+      if (x < 520 && y < 100) continue;
+      const tw = 0.5 + 0.5 * Math.sin(beat * 1.7 + n * 2.1), r = 1.4 + 1.3 * tw;
+      ellipse(x, y, r, r, `rgba(255,248,214,${0.45 + 0.55 * tw})`);
+    }
+    ellipse(660, 92, 36, 36, 'rgba(244,227,161,0.18)');
+    ellipse(660, 92, 30, 30, '#F4E3A1');
+    ellipse(650, 84, 6, 5, 'rgba(200,170,90,0.35)'); ellipse(670, 102, 4.5, 4, 'rgba(200,170,90,0.35)'); ellipse(668, 80, 3, 3, 'rgba(200,170,90,0.3)');
+  }
+  function drawWheat(x, y, h, lean) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(lean);
+    line(0, 0, 0, -h, 3, '#C49A45');
+    for (let i = 0; i < 6; i++) { const yy = -h + 10 + i * 9; ellipse(-5, yy, 4, 8, '#E2B15A', -0.5); ellipse(5, yy + 4, 4, 8, '#E2B15A', 0.5); }
+    ellipse(0, -h, 3.5, 8, '#E2B15A');
+    ctx.restore();
+  }
+  function drawWheatField(beat) {
+    for (const [x, h, lean] of [[470, 120, -0.12], [492, 140, 0.04], [512, 110, 0.15], [1180, 120, -0.1], [1202, 145, 0.05], [1224, 112, 0.16]]) drawWheat(x, 286, h, lean + 0.03 * Math.sin(beat * 1.5 + x));
+  }
+  function drawMill(beat) {
+    ctx.save(); ctx.translate(462, 286); ctx.scale(0.85, 0.85);
+    ctx.fillStyle = '#E9E3D6'; ctx.beginPath(); ctx.moveTo(-34, 0); ctx.lineTo(-22, -118); ctx.lineTo(22, -118); ctx.lineTo(34, 0); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#8C2F39'; ctx.beginPath(); ctx.moveTo(-30, -116); ctx.lineTo(0, -148); ctx.lineTo(30, -116); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#6B4A35'; ctx.fillRect(-9, -34, 18, 34);
+    ctx.translate(0, -112); ctx.rotate(beat * 0.35);
+    for (let i = 0; i < 4; i++) { ctx.rotate(Math.PI / 2); ctx.fillStyle = '#B9AE98'; ctx.fillRect(-4, 6, 8, 74); ctx.fillStyle = '#F4EFDD'; ctx.fillRect(4, 26, 12, 52); }
+    ellipse(0, 0, 7, 7, '#5C6170');
+    ctx.restore();
+  }
+  function drawHedgehog(x, y) {
+    ctx.save(); ctx.translate(x, y);
+    ellipse(0, 4, 48, 9, 'rgba(30,43,71,0.16)');
+    ctx.fillStyle = '#5A3E2B'; ctx.beginPath();
+    for (let i = 0; i <= 16; i++) { const a = Math.PI + i / 16 * Math.PI, r = i % 2 ? 40 : 52; ctx.lineTo(Math.cos(a) * r * 1.1, Math.sin(a) * r * 0.85); }
+    ctx.closePath(); ctx.fill();
+    ellipse(-44, -12, 17, 12, '#E7C9A0');
+    ellipse(-60, -14, 4, 4, '#1E2B47'); ellipse(-46, -18, 2.6, 2.6, '#1E2B47');
+    ctx.restore();
+  }
+
+  function drawPine(x, y, scale) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale);
+    line(0, -8, 0, -100, 15, '#976541');
+    for (const [top, bottom, half] of [[-180, -90, 43], [-140, -48, 58], [-100, -14, 72]]) {
+      ctx.fillStyle = top === -140 ? '#688D62' : '#799B6E';
+      ctx.beginPath(); ctx.moveTo(0, top); ctx.lineTo(half, bottom); ctx.quadraticCurveTo(0, bottom + 12, -half, bottom); ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawSquirrel(x, y) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(0.6, 0.6);
+    ctx.strokeStyle = '#BC713C'; ctx.lineWidth = 29; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(14, -6); ctx.bezierCurveTo(80, -10, 76, -100, 45, -99); ctx.bezierCurveTo(15, -99, 17, -62, 44, -60); ctx.stroke();
+    ellipse(-3, -24, 25, 35, '#BF7842'); ellipse(-11, -18, 13, 23, '#F1D3A6');
+    ellipse(-15, -64, 25, 23, '#BF7842');
+    ellipse(-25, -86, 7, 15, '#BF7842', -0.2); ellipse(-7, -86, 7, 15, '#BF7842', 0.2);
+    ellipse(-29, -63, 4, 5, '#263629'); ellipse(-38, -54, 5, 4, '#513C2C');
+    ellipse(-25, 3, 19, 7, '#A96436');
+    ellipse(-29, -29, 9, 12, '#875732'); line(-18, -38, -29, -29, 10, '#BF7842');
+    ctx.restore();
+  }
+
+  function drawBasket(x, y, beat) {
+    ctx.save(); ctx.translate(x, y);
+    ellipse(0, 5, 55, 10, 'rgba(30,43,71,0.14)');
+    ctx.strokeStyle = '#A36F3B'; ctx.lineWidth = 7;
+    ctx.beginPath(); ctx.ellipse(0, -40, 32, 30, 0, Math.PI, TAU); ctx.stroke();
+    ctx.fillStyle = '#C99B5C'; ctx.beginPath(); ctx.roundRect(-45, -43, 90, 48, [5, 5, 16, 16]); ctx.fill();
+    for (let yy = -31; yy < 0; yy += 10) line(-40, yy, 40, yy, 2, '#AF7C44');
+    for (let xx = -32; xx <= 32; xx += 16) line(xx, -40, xx, 0, 2, '#DFC08B');
+    ellipse(0, -42, 43, 9, '#895A32');
+    const remaining = beat < 40 ? 5 : Math.max(0, 5 - Math.floor((beat - 40) / 2));
+    for (let n = 0; n < remaining; n++) ellipse(-27 + n * 13, -45, 8, 9, n % 2 ? '#BB8950' : '#D5AC6A', 0.2);
+    ctx.restore();
+  }
+
+  function drawOven(x, y, glow) {
+    ctx.save(); ctx.translate(x, y);
+    ellipse(0, 4, 60, 12, 'rgba(30,43,71,0.18)');
+    ctx.fillStyle = '#5C6170'; ctx.fillRect(18, -112, 16, 40);
+    ctx.fillStyle = '#E9E3D6'; ctx.beginPath(); ctx.roundRect(-52, -80, 104, 82, 14); ctx.fill();
+    ctx.strokeStyle = '#B9AE98'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = '#3A2A22'; ctx.beginPath(); ctx.roundRect(-32, -52, 64, 40, 8); ctx.fill();
+    const g = ctx.createRadialGradient(0, -24, 4, 0, -24, 40);
+    g.addColorStop(0, `rgba(255,200,60,${0.5 + 0.5 * glow})`); g.addColorStop(1, 'rgba(232,76,61,0.25)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(-28, -48, 56, 32, 6); ctx.fill();
+    ctx.restore();
+  }
+
+  const CHIEF = { skin: '#F5D3B8', hair: '#D9A441', shirt: '#1E2B47', pants: '#8C2F39', style: 'short' };
+  const lookOf = f => f === 10 ? CHIEF : KIDS[f];
+  const kidScale = y => 0.33 + 0.16 * clamp((y - 306) / 224);
+  function handsOnScreen(p, pos, sc) {
+    const dy = p.seated * 75 - (p.jump - p.squat + p.bob);
+    return [[-42, p.lx, p.ly], [42, p.rx, p.ry]].map(([sx, hx, hy]) => {
+      const a = elbowFor(sx, -218, hx, hy, 56, 78, p.elbowLow);
+      return { x: pos.x + sc * (a.hx + p.sway), y: pos.y + sc * (a.hy + dy) };
+    });
+  }
+  // Holding hands is drawn as two arm halves meeting between the nearest hands of both kids.
+  function drawLink(fa, fb, ha, hb, w, alpha) {
+    let best = null;
+    for (const a of ha) for (const b of hb) { const d = Math.hypot(a.x - b.x, a.y - b.y); if (!best || d < best.d) best = { a, b, d }; }
+    if (!best || best.d > 170) return;
+    const mx = (best.a.x + best.b.x) / 2, my = (best.a.y + best.b.y) / 2 + 4;
+    ctx.save(); ctx.globalAlpha = alpha;
+    for (const extra of [3, 0]) for (const [h, f] of [[best.a, fa], [best.b, fb]]) line(h.x, h.y, mx, my, w + extra, extra ? OUTLINE : lookOf(f).skin);
+    ctx.restore();
+  }
+  function renderEngine(beat, i, s, lb) {
+    const st = formState(s, lb);
+    const figs = Array.from({ length: GAME.noLeader ? 10 : 11 }, (_, f) => {
+      const pos = figPos(s, lb, f, st), sc = kidScale(pos.y) + (f === s.leaderFig ? 0.02 : 0), pose = poseAt(beat, f);
+      return { f, pos, sc, pose, hands: handsOnScreen(pose, pos, sc) };
+    });
+    if (s.links) {
+      const prev = segs[i - 1], alpha = prev && prev.links === s.links ? 1 : ease(clamp(lb / 0.5));
+      const pairs = [];
+      if (s.links === 'ring') for (let k = 0; k < 10; k++) pairs.push([k, (k + 1) % 10]);
+      else { const sw = Math.round(st.swap); for (let p = 0; p < 5; p++) pairs.push([2 * p, 2 * ((p - sw + 5) % 5) + 1]); }
+      for (const [ka, kb] of pairs) {
+        const a = figs[s.slotFig[ka]], b = figs[s.slotFig[kb]];
+        drawLink(a.f, b.f, a.hands, b.hands, 15 * (a.sc + b.sc) / 2, alpha);
+      }
+    }
+    if (s.takeLink && lb > 1.5) {
+      const leader = figs[s.leaderFig], kid = figs[s.slotFig[s.chosen]];
+      drawLink(leader.f, kid.f, [leader.hands[0]], [kid.hands[1]], 6, 1);
+    }
+    const items = figs.map(it => ({ y: it.pos.y, draw: () => {
+      const leader = it.f === s.leaderFig;
+      const stone = stoneHandoff && (beat < stoneHandoff.beat ? it.f === stoneHandoff.from : it.f === stoneHandoff.to);
+      drawKid(lookOf(it.f), it.pos.x, it.pos.y, it.sc, it.pos.back, beat, { fig: it.f, pose: it.pose, mark: leader ? GAME.leaderMark : null, stone });
+    } }));
+    if (GAME.prop) items.push({ y: CY - 1, draw: () => GAME.prop(CX, CY) });
+    items.sort((a, b) => a.y - b.y).forEach(it => it.draw());
+    return drawKid(LEADER, 215, 545, 0.98, false, beat);
+  }
+
+  function render(beat) {
+    ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    drawRoom(beat);
+    const i = segAt(beat), s = segs[i], lb = beat - s.start;
+
+    let lead;
+    if (ENGINE) lead = renderEngine(beat, i, s, lb);
+    else {
+    const p0 = poseAt(beat);
+    const shrink = 1 - 0.3 * p0.step;
+    const items = KIDS.map((look, k) => {
+      const a = -Math.PI / 2 + (k + 0.5) * TAU / 10 + p0.walk * Math.sin(beat * 0.55 + k * 1.8) * 0.45;
+      const kidX = lerp(CX + RX * shrink * Math.cos(a), 570 + (k % 5) * 130 + 30 * Math.sin(beat * 0.9 + k), p0.walk);
+      const kidY = lerp(CY + RY * shrink * Math.sin(a), 355 + Math.floor(k / 5) * 150 + 30 * Math.sin(beat * 0.75 + k * 1.3), p0.walk);
+      const depth = lerp((Math.sin(a) + 1) / 2, clamp((kidY - 300) / 260), p0.walk);
+      return { y: kidY, draw: () => drawKid(look, kidX, kidY, 0.33 + 0.16 * depth, Math.sin(a) > 0.5, beat) };
+    });
+    items.push({ y: CY - 1, draw: () => isSquirrel ? drawBasket(CX, CY, beat) : drawOven(CX, CY, p0.step) });
+    items.sort((a, b) => a.y - b.y).forEach(it => it.draw());
+
+    lead = drawKid(LEADER, 215 + p0.walk * 48 * Math.sin(beat * 0.9), 545 + 22 * p0.step, 0.98 + 0.08 * p0.step, false, beat);
+    }
+
+    const pop = (from, to) => lb < from || lb > to ? 0 : Math.min(1, (lb - from) / 0.2) * (lb > to - 0.2 ? (to - lb) / 0.2 : 1);
+    if (s.kind === 'nam') {
+      const b = pop(0.1, 3.9);
+      bubble(370, lead.headTop + 18, 'nämm-nämm!', 30, b);
+      bubble(CX, 170, 'nämm-nämm!', 26, b);
+    }
+    if (s.kind === 'shout') {
+      const b = pop(1.95, 3.6);
+      bubble(372, lead.headTop + 10, 'KÄRA!', 44, b * (1 + 0.08 * Math.sin(lb * 20)));
+      bubble(CX, 160, 'KÄRA!', 36, b);
+    }
+    if (s.bubble) {
+      const b = pop(s.bubble.from, s.bubble.to);
+      bubble(372, lead.headTop + 14, s.bubble.text, 32, b);
+      bubble(CX, 165, s.bubble.text, 28, b);
+    }
+
+    ctx.fillStyle = GAME.room.ink ?? '#1E2B47'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.font = '800 34px "Baloo 2", "Trebuchet MS", sans-serif';
+    ctx.fillText(gameTitle, 36, 54);
+    ctx.font = '600 17px "Nunito", "Segoe UI", sans-serif';
+    ctx.fillStyle = GAME.room.sub ?? 'rgba(30,43,71,0.7)';
+    ctx.fillText('Vaata ja tee järele', 36, 80);
+    const nxt = segs[i + 1];
+    if (nxt && nxt.kind !== 'end') {
+      ctx.textAlign = 'right';
+      ctx.fillText('Järgmine: ' + joinWords(nxt.words), W - 36, 54);
+    }
+
+    ctx.fillStyle = '#1E2B47'; ctx.fillRect(0, 590, W, 130);
+    ctx.textAlign = 'left';
+    ctx.font = '800 15px "Nunito", "Segoe UI", sans-serif';
+    ctx.fillStyle = '#FFC93C';
+    ctx.letterSpacing = '2px';
+    ctx.fillText(s.label, 36, 632);
+    ctx.letterSpacing = '0px';
+    const curBeat = Math.floor(lb);
+    for (let b = 0; b < 4; b++) {
+      ctx.beginPath(); ctx.arc(44 + b * 22, 656, 7, 0, TAU);
+      if (b === curBeat) { ctx.fillStyle = '#FFC93C'; ctx.fill(); }
+      else { ctx.strokeStyle = 'rgba(255,255,255,0.45)'; ctx.lineWidth = 2; ctx.stroke(); }
+    }
+    ctx.font = '600 13px "Nunito", "Segoe UI", sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.fillText('takt', 36, 684);
+
+    let x = 170;
+    ctx.font = '700 42px "Baloo 2", "Trebuchet MS", sans-serif';
+    const wi = s.wordBeats ? s.wordBeats.filter(t => lb >= t).length - 1 : s.words.length === 1 ? 0 : (s.kind === 'intro' ? curBeat : Math.min(curBeat, 3));
+    s.words.forEach((w, k) => {
+      const active = k === wi && (s.wordBeats || s.kind === 'intro' || s.words.length === 1 || curBeat < 3);
+      ctx.fillStyle = active ? '#FFC93C' : (k < wi || (curBeat >= 3 && s.kind !== 'intro') ? '#FFFFFF' : 'rgba(255,255,255,0.5)');
+      ctx.fillText(w, x, 640);
+      x += ctx.measureText(w + (s.kind === 'intro' ? '   ' : wordGap(w))).width;
+    });
+
+    if (ENGINE && s.lead) {
+      const rows = [[GAME.ringLabel ?? 'Ringis olijad:', s.act, '#CDD6EA', 'rgba(205,214,234,0.7)'], [GAME.leadLabel ?? 'Juht:', s.lead, '#FFE6A6', '#FFC93C']];
+      rows.forEach(([label, text, color, labelColor], r) => {
+        const ty = 674 + r * 29;
+        ctx.font = '800 15px "Nunito", "Segoe UI", sans-serif'; ctx.fillStyle = labelColor;
+        ctx.fillText(label, 170, ty);
+        for (const size of [19, 17, 15]) {
+          ctx.font = `600 ${size}px "Nunito", "Segoe UI", sans-serif`;
+          if (ctx.measureText(text).width <= W - 300 - 36) break;
+        }
+        ctx.fillStyle = color; ctx.fillText(text, 300, ty);
+      });
+      return;
+    }
+    ctx.font = '600 19px "Nunito", "Segoe UI", sans-serif';
+    ctx.fillStyle = '#CDD6EA';
+    const words = s.act.split(' ');
+    let lineTxt = '', y = 676;
+    for (const w of words) {
+      const t = lineTxt ? lineTxt + ' ' + w : w;
+      if (ctx.measureText(t).width > W - 170 - 36) { ctx.fillText(lineTxt, 170, y); lineTxt = w; y += 26; }
+      else lineTxt = t;
+    }
+    ctx.fillText(lineTxt, 170, y);
+  }
+
+  const DEFAULT_BPM = 90;
+  const segSeconds = (s, bpm) => s.len * 60 / (bpm * (s.tempo ?? 1));
+  function beatAtSeconds(sec, bpm) {
+    for (const s of segs) { const d = segSeconds(s, bpm); if (sec < d) return s.start + sec / d * s.len; sec -= d; }
+    return total - 0.001;
+  }
+  window.patsu = {
+    totalBeats: total,
+    render,
+    renderAtSeconds(sec, bpm = DEFAULT_BPM) { render(beatAtSeconds(sec, bpm)); },
+    durationSeconds(bpm = DEFAULT_BPM) { return segs.reduce((sum, s) => sum + segSeconds(s, bpm), 0); },
+    events() {
+      const ev = [];
+      for (const s of segs) {
+        if (s.kind !== 'end') for (let b = 0; b < 4; b++) ev.push({ beat: s.start + b, type: 'tick', strong: b === 0 });
+        if (s.kind === 'clap') for (const b of [0, 1, 2]) ev.push({ beat: s.start + b, type: 'clap' });
+        if (s.kind === 'knock') for (const b of [0, 1, 2, 3]) ev.push({ beat: s.start + b, type: 'knock' });
+        if (s.kind === 'pine') ev.push({ beat: s.start + 0.9, type: 'thud' });
+        if (s.kind === 'shout') ev.push({ beat: s.start + 2.7, type: 'thud' });
+        if (s.sounds) for (const [b, type] of s.sounds) ev.push({ beat: s.start + b, type });
+      }
+      return ev;
+    },
+  };
+
+  const playBtn = document.getElementById('play');
+  const bpmIn = document.getElementById('bpm'), bpmOut = document.getElementById('bpmOut');
+  const loopIn = document.getElementById('loop'), soundIn = document.getElementById('sound');
+  const linesEl = document.getElementById('lines');
+  let bpm = DEFAULT_BPM, beat = 0, playing = false, lastTs = 0, audio = null;
+  const EVENTS = window.patsu.events();
+  const START_BEAT = isSquirrel ? 0 : segs[1].start;
+  const music = document.getElementById('music');
+  const musicFile = document.getElementById('musicFile');
+  const musicStatus = document.getElementById('musicStatus');
+  const removeMusic = document.getElementById('removeMusic');
+  let musicUrl = null, musicReady = false, musicName = '';
+
+  function clearMusic(resetSelection = true) {
+    musicReady = false;
+    music.pause(); music.removeAttribute('src'); music.load();
+    if (musicUrl) URL.revokeObjectURL(musicUrl);
+    musicUrl = null; musicName = '';
+    if (resetSelection) musicFile.value = '';
+    music.hidden = true; removeMusic.hidden = true;
+  }
+  function playMusic() {
+    if (!musicReady || !music.paused) return;
+    const requestedUrl = musicUrl;
+    music.play().catch(error => {
+      if (musicUrl !== requestedUrl || error.name === 'AbortError') return;
+      musicStatus.textContent = 'Muusika ei käivitunud. Proovi helimängija nuppu või vali teine fail.';
+    });
+  }
+  musicFile.addEventListener('change', () => {
+    const file = musicFile.files[0];
+    if (!file) return;
+    playing = false; lastTs = 0; beat = START_BEAT; syncUi();
+    clearMusic(false);
+    musicName = file.name;
+    musicUrl = URL.createObjectURL(file);
+    musicStatus.textContent = 'Avan faili: ' + file.name;
+    removeMusic.hidden = false;
+    music.src = musicUrl;
+  });
+  music.addEventListener('loadedmetadata', () => {
+    if (!musicUrl) return;
+    musicReady = true; music.hidden = false; soundIn.checked = false;
+    musicStatus.textContent = musicName + ' · Vajuta Mängi. ' + GAME.soundWord + ' ja takti saad soovi korral uuesti sisse lülitada.';
+    if (playing) playMusic();
+  });
+  music.addEventListener('error', () => {
+    if (!musicUrl || !music.error) return;
+    clearMusic();
+    musicStatus.textContent = 'Seda helifaili ei saa esitada. Proovi MP3- või WAV-faili.';
+  });
+  removeMusic.addEventListener('click', () => {
+    clearMusic();
+    musicStatus.textContent = 'Muusika eemaldatud. Võid valida uue helifaili.';
+  });
+
+  LINES.forEach((l, idx) => {
+    const li = document.createElement('li');
+    const b = document.createElement('button');
+    b.type = 'button'; b.dataset.line = idx;
+    b.innerHTML = `<span class="w"></span><span class="a"></span>`;
+    b.querySelector('.w').textContent = joinWords(l.words);
+    b.querySelector('.a').textContent = l.act;
+    if (l.lead) {
+      const j = document.createElement('span'); j.className = 'j';
+      const label = document.createElement('b'); label.textContent = (GAME.leadLabel ?? 'Juht:') + ' ';
+      j.append(label, l.lead); b.querySelector('.a').appendChild(j);
+    }
+    b.addEventListener('click', () => {
+      const seg = segs.find(s => s.lineIndex === idx);
+      beat = seg.start; start();
+    });
+    li.appendChild(b); linesEl.appendChild(li);
+  });
+
+  function ensureAudio() {
+    if (audio) return audio;
+    try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch { audio = null; }
+    return audio;
+  }
+  function synth(ac, dest, type, strong, t) {
+    if (type === 'clap') {
+      const len = 0.12, buf = ac.createBuffer(1, Math.floor(ac.sampleRate * len), ac.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 3);
+      const src = ac.createBufferSource(); src.buffer = buf;
+      const f = ac.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1400; f.Q.value = 0.8;
+      const g = ac.createGain(); g.gain.value = 0.9;
+      src.connect(f).connect(g).connect(dest); src.start(t);
+    } else {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.frequency.value = type === 'thud' ? 90 : type === 'knock' ? 220 : (strong ? 1320 : 880);
+      g.gain.setValueAtTime(type === 'thud' ? 0.6 : 0.12, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + (type === 'thud' ? 0.25 : 0.06));
+      o.connect(g).connect(dest); o.start(t); o.stop(t + 0.3);
+    }
+  }
+  window.patsu.synth = synth;
+  function playSound(type, strong) {
+    const ac = ensureAudio(); if (!ac || !soundIn.checked) return;
+    synth(ac, ac.destination, type, strong, ac.currentTime);
+  }
+
+  function syncUi() {
+    playBtn.textContent = playing ? '❚❚ Paus' : '▶ Mängi';
+    const s = segs[segAt(beat)];
+    linesEl.querySelectorAll('button').forEach(b => b.setAttribute('aria-current', String(Number(b.dataset.line) === s.lineIndex)));
+  }
+  function start() {
+    if (beat >= total - 0.01) { beat = 0; if (musicReady) music.currentTime = 0; }
+    playing = true; lastTs = 0; ensureAudio()?.resume?.(); syncUi();
+    playMusic();
+  }
+  function frame(ts) {
+    if (playing) {
+      if (lastTs) {
+        const prev = beat;
+        let next = beat + (ts - lastTs) / 1000 * bpm / 60 * (segs[segAt(beat)].tempo ?? 1);
+        const s = segs[segAt(prev)];
+        if (loopIn.checked && s.lineIndex !== undefined && next >= s.start + s.len) next = s.start + (next - s.start - s.len);
+        else for (const e of EVENTS) if (e.beat > prev && e.beat <= next) playSound(e.type, e.strong);
+        if (next >= total) { next = total - 0.001; playing = false; music.pause(); }
+        beat = next;
+        if (segAt(prev) !== segAt(beat)) syncUi();
+        if (!playing) syncUi();
+      }
+      lastTs = ts;
+    }
+    render(beat);
+    requestAnimationFrame(frame);
+  }
+
+  playBtn.addEventListener('click', () => { if (playing) { playing = false; music.pause(); syncUi(); } else start(); });
+  document.getElementById('restart').addEventListener('click', () => { beat = 0; if (musicReady) music.currentTime = 0; start(); });
+  bpmIn.addEventListener('input', () => { bpm = Number(bpmIn.value); bpmOut.textContent = `${bpm} lööki/min`; });
+  document.getElementById('full').addEventListener('click', () => {
+    const st = document.getElementById('stage');
+    if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+    else st.requestFullscreen?.().catch(() => {});
+  });
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space' && e.target === document.body) { e.preventDefault(); playBtn.click(); }
+  });
+
+  beat = START_BEAT;
+  if (!new URLSearchParams(location.search).has('export')) {
+    document.fonts?.ready?.then(() => render(beat));
+    syncUi();
+    requestAnimationFrame(frame);
+  }
+})();
+</script>
+
+</body></html>
